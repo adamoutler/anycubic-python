@@ -184,7 +184,7 @@ if (type(processed) is dict ):
         print(k+": "+v)
 elif (type(processed) is list):
     for item in processed:
-        if item is dict:
+        if  type(item) is dict:
            for k, v in item.items():
                print(v+": "+k)       
         else:
