@@ -1,10 +1,10 @@
 """Utility class to update mono x configuration"""
-from config.custom_components.anycubic_wifi.const import (
+from .const import (
     CONF_MODEL,
     CONF_SERIAL,
     SW_VERSION,
 )
-from config.custom_components.anycubic_wifi.monox import MonoX
+from .monox import MonoX
 from config.custom_components.anycubic_wifi.monoxresponse import MonoXSysInfo
 from homeassistant.const import CONF_HOST, CONF_NAME
 
