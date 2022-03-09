@@ -1,0 +1,16 @@
+{
+  "name": "Anycubic 3D Printer",
+  "domain": "anycubic_wifi",
+  "config_flow": true,
+  "documentation": "https://www.home-assistant.io/integrations/anycubic_wifi",
+  "requirements": [],
+  "ssdp": [],
+  "zeroconf": [],
+  "homekit": {},
+  "dependencies": [],
+  "version":"1",
+  "codeowners": [
+    "@adamoutler"
+  ],
+  "iot_class": "local_polling"
+}
