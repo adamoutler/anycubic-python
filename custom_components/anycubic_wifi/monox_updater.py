@@ -5,7 +5,7 @@ from .const import (
     SW_VERSION,
 )
 from .monox import MonoX
-from config.custom_components.anycubic_wifi.monoxresponse import MonoXSysInfo
+from .monoxresponse import MonoXSysInfo
 from homeassistant.const import CONF_HOST, CONF_NAME
 
 
