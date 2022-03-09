@@ -4,9 +4,9 @@ import asyncio
 import logging
 import voluptuous as vol
 
-from config.custom_components.anycubic_uart.device import AnycubicUartWifiDevice
-from config.custom_components.anycubic_uart.monox import MonoX
-from config.custom_components.anycubic_uart.monox_updater import get_monox_info
+from .device import AnycubicUartWifiDevice
+from .monox import MonoX
+from .monox_updater import get_monox_info
 
 
 from . import arp_config
