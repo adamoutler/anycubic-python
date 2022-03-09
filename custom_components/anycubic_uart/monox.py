@@ -22,7 +22,7 @@ from .monoxresponse import (
 import logging
 import socket
 
-from config.custom_components.anycubic_uart import monoxresponse
+from .anycubic_uart import monoxresponse
 
 _LOGGER = logging.getLogger(__name__)
 
