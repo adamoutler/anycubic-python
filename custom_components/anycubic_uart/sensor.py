@@ -2,8 +2,8 @@
 from __future__ import annotations
 from datetime import timedelta
 import time
-from config.custom_components.anycubic_uart.base_entry import MonoXEventBase
-from config.custom_components.anycubic_uart.device import AnycubicUartWifiDevice
+from .base_entry import MonoXEventBase
+from .device import AnycubicUartWifiDevice
 from homeassistant import config_entries
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
