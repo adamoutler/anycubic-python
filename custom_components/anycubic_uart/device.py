@@ -1,7 +1,7 @@
 """Axis network device abstraction."""
 from queue import Empty
 from types import MappingProxyType
-from config.custom_components.anycubic_uart import  monox_updater
+from .anycubic_uart import  monox_updater
 
 from .errors import CannotConnect
 
