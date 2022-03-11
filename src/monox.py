@@ -4,6 +4,7 @@ The development environment is Visual Studio Code. See launch.json for auto-conf
 
 
 from asyncio.log import logger
+from datetime import datetime
 import os
 import sys
 from queue import Empty
@@ -11,10 +12,15 @@ import socket
 import getopt
 import tempfile
 
-from monox_response import FileList, InvalidResponse, MonoXPreviewImage, MonoXResponseType, MonoXStatus, MonoXSysInfo
 
-
-
+from monox_response import (
+    FileList,
+    InvalidResponse,
+    MonoXPreviewImage,
+    MonoXResponseType,
+    MonoXStatus,
+    MonoXSysInfo,
+)
 
 
 PORT = 6000  # Port to listen on
@@ -102,14 +108,25 @@ def __do_request(sock, socket_address, to_be_sent) -> MonoXResponseType:
     :param sock: the socket to use for the request
     :param request: the request to send
     :return: a MonoX object"""
-    text_received = ""
+
     try:
         _LOGGER.debug("connecting to %s", socket_address)
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.connect(socket_address)
         sock.sendall(to_be_sent)
-        while not str(text_received).endswith(END):
-            text_received += str(sock.recv(1).decode())
+        if str(to_be_sent).startswith("b'getPreview2"):
+            text_received = bytearray()
+            print(text_received)
+            end_time = datetime.now().microsecond + 10000
+            while (
+                not str(text_received).endswith(END)
+                and datetime.now().microsecond < end_time
+            ):
+                text_received.extend(sock.recv(1))
+        else:
+            text_received = ""
+            while not str(text_received).endswith(END):
+                text_received += str(sock.recv(1).decode())
     except OSError as exception:
         _LOGGER.error(
             "Could not connect to AnyCubic printer at %s %s:%s",
