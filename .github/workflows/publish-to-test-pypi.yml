@@ -11,8 +11,8 @@ jobs:
     name: Build and publish Python 🐍 ${{ matrix.python-version }} distributions 📦 to PyPI and TestPyPI
     steps:
     - uses: actions/checkout@v2
-    - name: Set up Python
     - uses: actions/setup-python@v2
+      name: Set up Python
       with:
         python-version: ${{ matrix.python-version }}
         architecture: x64
