@@ -1,16 +1,23 @@
 {
-    "cSpell.words": [
-        "adamoutler",
-        "gopause",
-        "goprint",
-        "goresume",
-        "gostop",
-        "INET",
-        "monox",
-        "Outler",
-        "pwmb",
-        "sysinfo",
-        "Zhome",
-        "Zmove"
-    ]
+  "python.defaultInterpreterPath": "/usr/local/bin/python3",
+  "python.autoComplete.extraPaths": [
+    "./src",
+    "anycubic-python/src",
+    "workspace/anycubic-python/src"
+  ],
+  "cSpell.words": [
+    "adamoutler",
+    "gopause",
+    "goprint",
+    "goresume",
+    "gostop",
+    "INET",
+    "monox",
+    "Outler",
+    "pwmb",
+    "sysinfo",
+    "Zhome",
+    "Zmove"
+  ],
+  "python.analysis.extraPaths": ["./src"]
 }

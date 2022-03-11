@@ -5,11 +5,11 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "args": ["-i","192.168.1.254","--command=getstatus"],
+            "args": ["-i","192.168.1.254","--command=sysinfo"],
             "name": "Python: Current File",
             "type": "python",
             "request": "launch",
-            "program": "scripts/monox.py",
+            "program": "src/monox.py",
             "console": "integratedTerminal"
         }
     ]
