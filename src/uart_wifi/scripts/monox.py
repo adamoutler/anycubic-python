@@ -58,7 +58,7 @@ args:
 try:
     opts, args = getopt.gnu_getopt(sys.argv, "hi:c:", ["ipaddress=", "command="])
 # pylint: disable=broad-except
-except Exception:
+except Exception as e:
     print(HELP)
     sys.exit(0)
 
@@ -72,9 +72,9 @@ for opt, arg in opts:
         command = arg
         print(arg)
 
-if 'ip_address' not in locals():
+if "ip_address" not in locals():
     print("You must specify the host ip address (-i xxx.xxx.xxx.xxx)")
-if 'command' not in locals():
+if "command" not in locals():
     response = UartWifi(ip_address, PORT).send_request("getstatus")
 else:
     response = UartWifi(ip_address, PORT).send_request(command)

@@ -1,6 +1,5 @@
 """Main executable"""
 import os
-import sys
 import getopt
 import sys
 
