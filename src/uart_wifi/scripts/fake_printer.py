@@ -26,6 +26,7 @@ class AnycubicSimulator:
             + self.serial
             + ",SkyNet,endgetstatus,stop"
         )
+
     @staticmethod
     def getfile() -> str:
         """return getfile type"""
@@ -54,17 +55,13 @@ class AnycubicSimulator:
         self.printing = False
         return "gostop,OK,end"
 
-    def getmode(self) -> str:
-        """return getmode type"""
-        return "getmode,0,end"
-
     def start_server(self):
         """Start the uart_wifi simualtor server"""
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as my_socket:
             try:
-                s.bind((self.ip_address, self.port))
-                s.listen()
-                conn, addr = s.accept()
+                my_socket.bind((self.ip_address, self.port))
+                my_socket.listen()
+                conn, addr = my_socket.accept()
                 data_received = ""
                 with conn:
                     print(f"Connected by {addr}")
@@ -91,10 +88,10 @@ class AnycubicSimulator:
                             if data_received.startswith("gostop"):
                                 conn.sendall(self.gostop().encode())
                             if data_received.startswith("getmode"):
-                                conn.sendall(self.getmode().encode())
+                                conn.sendall("getmode,0,end".encode())
                             data_received = ""
             finally:
-                s.close()
+                my_socket.close()
 
 
 opts, args = getopt.gnu_getopt(sys.argv, "i:p:", ["ipaddress=", "port="])

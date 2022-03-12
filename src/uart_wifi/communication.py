@@ -32,7 +32,7 @@ _LOGGER = logger
 Any = object()
 
 
-class UartWifi:
+class UartWifi:  # pylint: disable=too-few-public-methods
     """Mono X Class"""
 
     def __init__(self, ip_address: str, port: int) -> None:
@@ -89,9 +89,9 @@ def _do_request(
 
 def __do_preview2(received_message: bytearray()):
     """Handles preview by writing to file."""
-    tempdir = tempfile.gettempdir()
+
     filename = received_message.decode("utf_8").split(",", 3)[1]
-    file = tempdir + os.path.sep + filename + ".bmp"
+    file = tempfile.gettempdir() + os.path.sep + filename + ".bmp"
     print(file)
 
     output_file = open(file=file, mode="rb")
@@ -177,17 +177,17 @@ def _do_handle(message: Any):
         return InvalidResponse(line)
 
 
-def __do_get_history(fields: list()):
+def __do_get_history(fields):
     """Handles history processing."""
     items = []
     for field in fields:
-        if field == fields[0] or field == fields[-1]:
+        if field in fields[0] or fields[-1]:
             continue
         items.append(field)
     return items
 
 
-def __do_sys_info(fields: list()):
+def __do_sys_info(fields):
     """Handles system info processing."""
     sys_info = MonoXSysInfo()
     if len(fields) > 2:
@@ -201,13 +201,13 @@ def __do_sys_info(fields: list()):
     return sys_info
 
 
-def __do_files(fields: list()):
+def __do_files(fields):
     """Handles file processing."""
     files = FileList(fields)
     return files
 
 
-def __do_status(fields: list()):
+def __do_status(fields):
     """Handles status processing."""
     status = MonoXStatus(fields)
     return status

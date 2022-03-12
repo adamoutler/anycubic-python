@@ -8,7 +8,7 @@ class MonoXResponseType:
 
     def print(self):
         """Print the MonoXResponse. Should be overridden by anything which implements this class."""
-        return "Status: " + str
+        return "Status: " + self.status
 
 
 class MonoXFileEntry(MonoXResponseType):
@@ -85,14 +85,13 @@ class MonoXSysInfo(MonoXResponseType):
         print("wifi: " + self.wifi)
 
 
-class MonoXStatus(MonoXResponseType):
+class MonoXStatus(MonoXResponseType): #pylint: disable=too-many-instance-attributes
     """Status object for MonoX.
 
     eg message.
         getstatus
         getstatus,stop
     """
-
     def __init__(self, message) -> None:
 
         self.status = message[1]
