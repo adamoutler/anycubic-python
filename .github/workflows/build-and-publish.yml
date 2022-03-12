@@ -1,4 +1,4 @@
-name: Publish Python 🐍 distributions 📦 to PyPI and TestPyPI
+name: Build anycubic-python 🐍 distributions
 
 on: push
 
@@ -8,7 +8,7 @@ jobs:
     strategy:
       matrix:
         python-version: [ 'pypy-3.7', 'pypy-3.8', 'pypy-3.9' ]
-    name: Build and publish Python 🐍 ${{ matrix.python-version }} distributions 📦 to PyPI and TestPyPI
+    name: Build Python 🐍 ${{ matrix.python-version }} 
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-python@v2
