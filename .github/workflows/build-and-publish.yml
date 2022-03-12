@@ -3,6 +3,13 @@ name: Build anycubic-python 🐍 distributions
 on: push
 
 jobs:
+  PythonLinting:
+    name: Python linting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Konstruktoid Python linting
+        uses: konstruktoid/action-pylint@master
   pylint:
     runs-on: ubuntu-latest
     steps:
