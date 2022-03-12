@@ -3,10 +3,12 @@ name: Publish Python 🐍 distributions 📦 to PyPI and TestPyPI
 on: push
 
 jobs:
-  setup:
-    runs-on: ubuntu-latest
-    
-    name: setup items. for Python  
+  build:
+    runs-on: ubuntu-18.04
+    strategy:
+      matrix:
+        python-version: [ 'pypy-3.7', 'pypy-3.8', 'pypy-3.9' ]
+    name: Build and publish Python 🐍 ${{ matrix.python-version }} distributions 📦 to PyPI and TestPyPI
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-python@v2
@@ -14,24 +16,12 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
         architecture: x64
-  build:
-    strategy:
-      matrix:
-        python-version: [ 'pypy-3.7', 'pypy-3.8', 'pypy-3.9' ]
-    name: build python 🐍${{ matrix.python-version }} 
-    runs-on: ubuntu-latest
-    needs: setup
-    steps:
     - run: >-
         python -m
         pip install
         build
         --user
-  package:
-    name: create distributions 📦
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
+        
     - name: Build a binary wheel and a source tarball
       run: >-
         python -m
@@ -39,7 +29,8 @@ jobs:
         --sdist
         --wheel
         --outdir dist/
-    - name: Publish distributions 📦 to PyPI
+ 
+    - name: Publish  
       if: startsWith(github.ref, 'refs/tags')
       uses: pypa/gh-action-pypi-publish@master
       with:
