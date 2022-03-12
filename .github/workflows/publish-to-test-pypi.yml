@@ -27,7 +27,7 @@ jobs:
         --user
   package:
     runs-on: ubuntu-latest
-    needs: setup
+    needs: build
     steps:
     - name: Build a binary wheel and a source tarball
       run: >-
