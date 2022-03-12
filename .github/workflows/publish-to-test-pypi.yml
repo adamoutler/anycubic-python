@@ -36,13 +36,8 @@ jobs:
         --sdist
         --wheel
         --outdir dist/
-  publish:
-    if: startsWith(github.ref, 'refs/tags')
-    runs-on: ubuntu-latest
-    name: Publish distribution 📦 to PyPI
-    needs: setup
-    steps:
     - name: Publish  
+      if: startsWith(github.ref, 'refs/tags')
       uses: pypa/gh-action-pypi-publish@master
       with:
         password: ${{ secrets.PYPI_API_TOKEN }}
