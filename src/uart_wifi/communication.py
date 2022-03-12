@@ -9,11 +9,9 @@ import os
 import sys
 from queue import Empty
 import socket
-import getopt
 import tempfile
 
-
-from monox_response import (
+from .response import (
     FileList,
     InvalidResponse,
     MonoXPreviewImage,
@@ -23,7 +21,7 @@ from monox_response import (
 )
 
 
-PORT = 6000  # Port to listen on
+# Port to listen on
 
 HOST = "192.168.1.254"
 COMMAND = "getstatus"
@@ -31,78 +29,27 @@ endRequired = ["goprint", "gostop", "gopause", "delfile"]
 END = ",end"
 ENCODING = "utf-8"
 _LOGGER = logger
-
-HELP = (
-    __file__
-    + """
-monox.py | Adam Outler (monox@hackedyour.info) | GPLv3
-
-Usage: monox.py -i <ip address> -c <command>
-args:
- -i [--ipaddress=] - The IP address which your Anycubic Mono X can be reached
-
- -c [--command=] - The command to send.
-   Commands may be used one-at-a-time. Only one command may be sent and it is
-        expected to be in the format below.
-    Command: getstatus - Returns a list of printer statuses.
-    Command: getfile - returns a list of files in format <internal name>: <file name>.
-        When referring to the file via command, use the <internal name>.
-    Command: sysinfo - returns Model, Firmware version, Serial Number, and wifi network.
-    Command: getwifi - displays the current wifi network name.
-    Command: gopause - pauses the current print.
-    Command: goresume - ends the current print.
-    Command: gostop,end - stops the current print.
-    Command: delfile,<internal name>,end - deletes a file.
-    command: gethistory,end - gets the history and print settings of previous prints.
-    Command: delhistory,end - deletes printing history.
-    Command: goprint,<internal name>,end - Starts a print of the requested file
-    Command: getPreview1,<internal name>,end - returns a list of dimensions used for the print.
-
-   Not Supported Commands may return unusable results.
-    Command (Not Supported): getPreview2,<internal name>,end
-     - returns a binary preview image of the print.
-
-   Unknown Commands are at your own risk and experimentation.
-   No attempt is made to process or stop execution of these commands.
-    Command: detect
-    Command: stopUV - unknown
-    Command: getpara - unknown
-    Command: getmode - unknown
-    Command: setname - unknown
-    Command: getname - unknown
-    Command: setwifi - unknown
-    Command: setZero - unknown
-    Command: setZhome - unknown
-    Command: setZmove - unknown
-    Command: setZstop - unknown
-    """
-)
-
-try:
-    opts, args = getopt.gnu_getopt(sys.argv, "hi:c:", ["ipaddress=", "command="])
-# pylint: disable=broad-except
-except Exception:
-    print(HELP)
-    sys.exit(0)
-
-for opt, arg in opts:
-    if opt == "-h":
-        print(HELP)
-        sys.exit()
-    elif opt in ("-i", "--ipaddress"):
-        HOST = arg
-    elif opt in ("-c", "--command"):
-        COMMAND = arg
-        print(arg)
-
-# Create a TCP/IP socket
-telnet_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-# Connect the socket to the port on the server given by the caller
-server_address = (HOST, PORT)
+Any = object()
 
 
-def __do_request(sock, socket_address, to_be_sent) -> MonoXResponseType:
+class UartWifi:
+    """Mono X Class"""
+
+    def __init__(self, ip_address: str, port: int) -> None:
+        self.server_address = (ip_address, port)
+        self.telnet_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+    def send_request(self, message_to_be_sent: str) -> MonoXResponseType:
+        """sends the Mono X request."""
+        request: str = bytes(message_to_be_sent, "utf-8")
+        received: str = _do_request(self.telnet_socket, self.server_address, request)
+        processed: MonoXResponseType = _do_handle(received)
+        return processed
+
+
+def _do_request(
+    sock: socket, socket_address: tuple, to_be_sent: bytes
+) -> MonoXResponseType:
     """Perform the request
 
     :param sock: the socket to use for the request
@@ -140,24 +87,12 @@ def __do_request(sock, socket_address, to_be_sent) -> MonoXResponseType:
     return text_received
 
 
-def __do_preview2(received_message):
+def __do_preview2(received_message: bytearray()):
     """Handles preview by writing to file."""
     tempdir = tempfile.gettempdir()
     filename = received_message.decode("utf_8").split(",", 3)[1]
     file = tempdir + os.path.sep + filename + ".bmp"
     print(file)
-
-    # output_file = open(file=file, mode="wb")
-    # byte_array = bytearray()
-    # so    ck.setblocking(0)
-    # ready = select.select([sock], [], [], 15)
-    # try:
-    #     while ready:
-    #         byte_array.append(sock.recv(1)[0])
-    # except BlockingIOError:
-    #     sock.close()
-    # finally:
-    #     sock.close()
 
     output_file = open(file=file, mode="rb")
 
@@ -201,7 +136,7 @@ def __do_preview2(received_message):
     return MonoXPreviewImage("")
 
 
-def __do_handle(message):
+def _do_handle(message: Any):
     """Perform handling of the message received by the request"""
     if message is None:
         return "no response"
@@ -242,7 +177,7 @@ def __do_handle(message):
         return InvalidResponse(line)
 
 
-def __do_get_history(fields):
+def __do_get_history(fields: list()):
     """Handles history processing."""
     items = []
     for field in fields:
@@ -252,7 +187,7 @@ def __do_get_history(fields):
     return items
 
 
-def __do_sys_info(fields):
+def __do_sys_info(fields: list()):
     """Handles system info processing."""
     sys_info = MonoXSysInfo()
     if len(fields) > 2:
@@ -266,35 +201,13 @@ def __do_sys_info(fields):
     return sys_info
 
 
-def __do_files(fields):
+def __do_files(fields: list()):
     """Handles file processing."""
     files = FileList(fields)
     return files
 
 
-def __do_status(fields):
+def __do_status(fields: list()):
     """Handles status processing."""
     status = MonoXStatus(fields)
     return status
-
-
-request: str = bytes(COMMAND, "utf-8")
-received: str = __do_request(telnet_socket, server_address, request)
-
-processed = __do_handle(received)
-if isinstance(processed, MonoXResponseType):
-    processed.print()
-elif isinstance(processed, dict):
-    for k, v in processed.items():
-        if v == str:
-            continue
-        print(k + ": " + v)
-elif isinstance(processed, list):
-    for item in processed:
-        if isinstance(item, dict):
-            for k, v in item.items():
-                print(v + ": " + k)
-        else:
-            print(item)
-else:
-    print(processed)

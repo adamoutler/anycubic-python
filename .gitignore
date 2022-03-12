@@ -1,0 +1,3 @@
+src/__pycache__/
+src/uart_wifi/__pycache__/
+src/uart_wifi.egg-info/

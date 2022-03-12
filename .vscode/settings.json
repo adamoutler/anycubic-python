@@ -1,10 +1,8 @@
 {
+  "python.analysis.logLevel": "Trace",
+  "python.analysis.watchSearchPaths": true,
   "python.defaultInterpreterPath": "/usr/local/bin/python3",
-  "python.autoComplete.extraPaths": [
-    "./src",
-    "anycubic-python/src",
-    "workspace/anycubic-python/src"
-  ],
+  "python.autoComplete.extraPaths": ["./src", "./src/uart-wifi"],
   "cSpell.words": [
     "adamoutler",
     "gopause",
@@ -16,8 +14,9 @@
     "Outler",
     "pwmb",
     "sysinfo",
+    "uart",
     "Zhome",
     "Zmove"
   ],
-  "python.analysis.extraPaths": ["./src"]
+  "python.analysis.extraPaths": ["./src", "./src/uart_wifi","./src/uart_wifi/scripts"]
 }
