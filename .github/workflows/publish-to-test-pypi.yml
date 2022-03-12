@@ -5,10 +5,8 @@ on: push
 jobs:
   setup:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: [ 'pypy-3.7', 'pypy-3.8', 'pypy-3.9' ]
-    name: Build and publish Python 🐍 ${{ matrix.python-version }} distributions 📦 to PyPI and TestPyPI
+    
+    name: setup items. for Python  
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-python@v2
@@ -17,6 +15,10 @@ jobs:
         python-version: ${{ matrix.python-version }}
         architecture: x64
   build:
+    strategy:
+      matrix:
+        python-version: [ 'pypy-3.7', 'pypy-3.8', 'pypy-3.9' ]
+    name: build python 🐍${{ matrix.python-version }} 
     runs-on: ubuntu-latest
     needs: setup
     steps:
@@ -26,6 +28,7 @@ jobs:
         build
         --user
   package:
+    name: create distributions 📦
     runs-on: ubuntu-latest
     needs: build
     steps:
@@ -36,7 +39,7 @@ jobs:
         --sdist
         --wheel
         --outdir dist/
-    - name: Publish  
+    - name: Publish distributions 📦 to PyPI
       if: startsWith(github.ref, 'refs/tags')
       uses: pypa/gh-action-pypi-publish@master
       with:
