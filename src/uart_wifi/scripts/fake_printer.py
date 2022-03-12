@@ -1,3 +1,5 @@
+#! python3
+"""Fake Anycubic Printer for tests"""
 import getopt
 import socket
 import sys
@@ -11,9 +13,9 @@ class AnycubicSimulator:
     printing = False
     serial = "0000170300020034"
 
-    def __init__(self, ip_address: str, port: int) -> None:
+    def __init__(self, ip_address: str, the_port: int) -> None:
         self.host = ip_address
-        self.port = port
+        self.port = the_port
         self.printing = False
         self.serial = "234234234"
 
@@ -24,8 +26,8 @@ class AnycubicSimulator:
             + self.serial
             + ",SkyNet,endgetstatus,stop"
         )
-
-    def getfile(self) -> str:
+    @staticmethod
+    def getfile() -> str:
         """return getfile type"""
         return "getfile,Widget.pwmb/0.pwmb,end"
 
@@ -51,6 +53,7 @@ class AnycubicSimulator:
             return "gostop,ERROR1,end"
         self.printing = False
         return "gostop,OK,end"
+
     def getmode(self) -> str:
         """return getmode type"""
         return "getmode,0,end"
@@ -96,12 +99,12 @@ class AnycubicSimulator:
 
 opts, args = getopt.gnu_getopt(sys.argv, "i:p:", ["ipaddress=", "port="])
 
-ip = "0.0.0.0"
-port = 6000
+IP = "0.0.0.0"
+PORT = 6000
 for opt, arg in opts:
     if opt in ("-i", "--ipaddress"):
-        ip = arg
+        IP = arg
     elif opt in ("-p", "--port"):
-        port = arg
+        PORT = arg
         print(arg)
-AnycubicSimulator(ip, int(port)).start_server()
+AnycubicSimulator(IP, int(PORT)).start_server()
