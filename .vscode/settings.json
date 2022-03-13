@@ -1,16 +1,32 @@
 {
-    "cSpell.words": [
-        "adamoutler",
-        "gopause",
-        "goprint",
-        "goresume",
-        "gostop",
-        "INET",
-        "monox",
-        "Outler",
-        "pwmb",
-        "sysinfo",
-        "Zhome",
-        "Zmove"
-    ]
+  "python.analysis.logLevel": "Trace",
+  "python.analysis.watchSearchPaths": true,
+  "python.defaultInterpreterPath": "/usr/local/bin/python3",
+  "python.autoComplete.extraPaths": [
+    "./src",
+    "./src/uart-wifi",
+    "./src/uart-wifi/scripts",
+    "/workspaces/anycubic-python/src"
+  ],
+  "cSpell.words": [
+    "adamoutler",
+    "gopause",
+    "goprint",
+    "goresume",
+    "gostop",
+    "INET",
+    "monox",
+    "Outler",
+    "pwmb",
+    "sysinfo",
+    "uart",
+    "Zhome",
+    "Zmove"
+  ],
+  "python.analysis.extraPaths": [
+    "./src",
+    "./src/uart_wifi",
+    "./src/uart_wifi/scripts",
+    "/workspaces/anycubic-python/src"
+  ]
 }
