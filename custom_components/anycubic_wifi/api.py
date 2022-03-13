@@ -14,12 +14,12 @@ class MonoXAPI(UartWifi):
 
     def getstatus(self) -> MonoXResponseType | None:
         """Get the MonoX Status"""
-        response = self.send_request(__name__)
+        response = self.send_request("getstatus")
         return check_monox_response(response,MonoXStatus)
 
     def sysinfo(self) -> MonoXResponseType | None:
         """Get the MonoX Status"""
-        response = self.send_request(__name__)
+        response = self.send_request("sysinfo")
         return check_monox_response(response,MonoXSysInfo)
 
 

@@ -20,7 +20,7 @@ from homeassistant.const import (
     CONF_NAME,
     CONF_PORT,
 )
-from homeassistant.core import HomeAssistant, callback
+from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.dispatcher import async_dispatcher_send
@@ -82,42 +82,42 @@ class AnycubicUartWifiDevice:
             self.config_entry.data["sw_version"] = "unknown version"
 
     @property
-    def ip_address(self)->str|None:
+    def ip_address(self) -> str | None:
         """Return the host address of this device."""
         return self.config_entry.data[CONF_HOST]
 
     @property
-    def port(self)->int|str|None:
+    def port(self) -> int | str | None:
         """Return the UART_WIFI port of this device."""
         return self.config_entry.data[CONF_PORT]
 
     @property
-    def fw_version(self)->str|None:
+    def fw_version(self) -> str:
         """Return the UART_WIFI port of this device."""
         return self.config_entry.data[SW_VERSION]
 
     @property
-    def model(self)->str|None:
+    def model(self) -> str | None:
         """Return the model of this device."""
         return self.config_entry.data[CONF_MODEL]
 
     @property
-    def name(self)->str|None:
+    def name(self) -> str | None:
         """Return the name of this device."""
         return self.config_entry.data[CONF_NAME]
 
     @property
-    def unique_id(self)->str:
+    def unique_id(self) -> str:
         """Return the unique ID (serial number) of this device."""
         return DOMAIN + "." + self.config_entry.data[CONF_SERIAL]
 
     @property
-    def serial(self)->str|None:
+    def serial(self) -> str | None:
         """Return the unique ID (serial number) of this device."""
         return self.config_entry.data[CONF_SERIAL]
 
     @property
-    def mac_address(self)->str|None:
+    def mac_address(self) -> str | None:
         """Return the mac of this device."""
         return self.config_entry.data[CONF_MAC]
 
@@ -136,24 +136,24 @@ class AnycubicUartWifiDevice:
         """Return the unique ID (serial number) of this device."""
         return True
 
-    def shutdown(self)->None:
+    def shutdown(self) -> None:
         """shutdown method"""
         # do the shutdown
 
     # Options
 
     @property
-    def option_events(self)->Any:
+    def option_events(self) -> Any:
         """Config entry option defining if platforms based on events should be created."""
         return self.config_entry.options.get(CONF_EVENTS, DEFAULT_EVENTS)
 
     @property
-    def copyright(self)->str:
+    def copyright(self) -> str:
         """copyright."""
         return "GPLv3"
 
     @property
-    def credits(self)->str:
+    def credits(self) -> str:
         """credits."""
         return "Adam Outler <adamoutler@gmail.com>"
 
@@ -173,7 +173,7 @@ class AnycubicUartWifiDevice:
         device.api.config.host = device.host
         async_dispatcher_send(hass, device.signal_new_address)
 
-    async def async_update_device_registry(self)->None:
+    async def async_update_device_registry(self) -> None:
         """Update device registry."""
         device_registry = dr.async_get(self.hass)
         device_registry.async_get_or_create(
@@ -194,15 +194,18 @@ class AnycubicUartWifiDevice:
                     self.api = await get_anycubic_device(
                         self.hass, self.config_entry.data[CONF_HOST]
                     )
+                    monox_updater.map_sysinfo_to_data(self.api.sysinfo(), self.config_entry.data)
 
         except KeyError as err:
             raise ConfigEntryNotReady from err
 
         async def start_platforms():
             await asyncio.gather(
-                *( self.hass.config_entries.async_forward_entry_setup(
+                *(
+                    self.hass.config_entries.async_forward_entry_setup(
                         self.config_entry, platform
-                    ) for platform in PLATFORMS
+                    )
+                    for platform in PLATFORMS
                 )
             )
 

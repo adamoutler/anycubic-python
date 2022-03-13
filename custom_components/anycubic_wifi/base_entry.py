@@ -5,6 +5,7 @@ from homeassistant.core import callback
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity import Entity
 
+
 class AnycubicUartEntityBase(Entity):
     """Base common to all MonoX entities."""
 
@@ -19,11 +20,11 @@ class AnycubicUartEntityBase(Entity):
         )
 
     @property
-    def available(self):
+    def available(self) -> bool:
         """Return True if device is available."""
         return True
 
     @callback
-    def update_callback(self, no_delay=None):
+    def update_callback(self, no_delay=None) -> None:
         """Update the entities state."""
         self.async_write_ha_state()
