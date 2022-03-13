@@ -11,13 +11,13 @@ from homeassistant.const import (
 )
 from homeassistant.core import HomeAssistant
 
-from .const import DOMAIN
+from .const import DOMAIN as MONOX_DOMAIN
 
 #  List the platforms that you want to support.
 # For your initial PR, limit it to 1 platform.
 PLATFORMS: list[Platform] = [Platform.SENSOR]
 
-DOMAIN = "anycubic_wifi"
+DOMAIN = MONOX_DOMAIN
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
@@ -46,7 +46,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 
 async def async_update(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    print(entry)
+    """Async Integration Update"""
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:

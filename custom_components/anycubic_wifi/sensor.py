@@ -2,14 +2,22 @@
 from __future__ import annotations
 from datetime import timedelta
 import time
-from typing import Any, Optional
+from typing import Any
 from .base_entry import AnycubicUartEntityBase
-from .monox import MonoX
+from uart_wifi.communication import UartWifi
+from uart_wifi.response import MonoXStatus
 from homeassistant import config_entries
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, CONF_UNIQUE_ID
 from homeassistant.helpers.entity import DeviceInfo
-from .const import CONF_MODEL, CONF_SERIAL, DEFAULT_STATE, DOMAIN, PRINTER_ICON
+from .const import (
+    CONF_MODEL,
+    CONF_SERIAL,
+    DEFAULT_STATE,
+    DOMAIN,
+    PRINTER_ICON,
+    UART_WIFI_PORT,
+)
 import logging
 
 
@@ -34,7 +42,7 @@ SCAN_INTERVAL = timedelta(seconds=15)
 async def async_setup(
     hass: HomeAssistant,
     entry: config_entries.ConfigEntry,
-):
+)->None:
     """The setup method"""
     _LOGGER.debug(entry)
 
@@ -49,8 +57,8 @@ async def async_setup_entry(
         hass.data[DOMAIN][entry.unique_id] = DOMAIN + entry[CONF_SERIAL]
 
     @callback
-    async def async_add_sensor():
-        """Add binary sensor from Axis device."""
+    async def async_add_sensor()->None:
+        """Add binary sensor from Anycubic device."""
 
         the_sensor = MonoXSensor(hass, entry)
         async_add_entities([the_sensor])
@@ -76,7 +84,7 @@ class MonoXSensor(SensorEntity, AnycubicUartEntityBase):
         """Initialize the sensor."""
         super().__init__(entry)
         self.cancel_scheduled_update = None
-        self.monox = MonoX(entry.data[CONF_HOST])
+        self.monox = UartWifi(entry.data[CONF_HOST], UART_WIFI_PORT)
         self.entry = entry
         self.hass = hass
         if not self.name:
@@ -89,13 +97,13 @@ class MonoXSensor(SensorEntity, AnycubicUartEntityBase):
 
     async def async_update(self) -> None:
         """Fetch new state data for the sensor."""
-        response = self.monox.get_status()
+        response: MonoXStatus = self.monox.send_request("getstatus")
         self._attr_extra_state_attributes = {}
 
         if response is not None:
             self._attr_native_value = response.status.strip()
             self._attr_state = response.status
-            if response.total_volume:
+            if hasattr(response, "total_volume"):
                 self.set_attr_int(_ATTR_CURLAYER, int(response.current_layer))
                 self.set_attr_int(_ATTR_TOTALLAYER, int(response.total_layers))
                 self.set_attr_int(
@@ -116,7 +124,6 @@ class MonoXSensor(SensorEntity, AnycubicUartEntityBase):
                     int(response.total_volume.replace("~", "", 1).replace("mL", "", 1)),
                 )
 
-                # self._attr_changed_by = _AUTO_UPDATE_REASON
             else:
                 self._attr_extra_state_attributes = []
 
@@ -128,16 +135,16 @@ class MonoXSensor(SensorEntity, AnycubicUartEntityBase):
             context=self._context,
         )
 
-    def set_attr_int(self, key: str, value: int):
+    def set_attr_int(self, key: str, value: int)->None:
         """Handle state attributes"""
         self._attr_extra_state_attributes[key] = int(value)
 
-    def set_attr_time(self, key: str, value: time):
+    def set_attr_time(self, key: str, value: time)->None:
         """Handle state attributes"""
         self._attr_extra_state_attributes[key] = int(value)
 
     @callback
-    def update_callback(self, no_delay=False):
+    def update_callback(self, no_delay=False)->None:
         """Update the sensor's state, if needed.
 
         Parameter no_delay is True when device_event_reachable is sent.
@@ -159,7 +166,7 @@ def async_check_significant_change(
     new_state: str,
     new_attrs: dict,
     **kwargs: Any,
-) -> Optional[bool]:
+) -> bool:
     """Significant Change Support. Insignificant changes are attributes only."""
     if old_state != new_state:
         return True

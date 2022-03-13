@@ -1,13 +1,17 @@
-"""Axis network device abstraction."""
+"""MonoX device abstraction."""
+from __future__ import annotations
+
 from queue import Empty
 from types import MappingProxyType
+from typing import Any
+
+from config.custom_components.anycubic_wifi.api import MonoXAPI
 from . import monox_updater
 
 from .errors import CannotConnect
 
 import asyncio
 import logging
-from .monox import MonoX
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     CONF_DOMAIN,
@@ -31,6 +35,7 @@ from .const import (
     DOMAIN,
     PLATFORMS,
     SW_VERSION,
+    UART_WIFI_PORT,
 )
 
 LOGGER = logging.getLogger(__name__)
@@ -50,9 +55,10 @@ class AnycubicUartWifiDevice:
         try:
             if config_entry.data is not Empty:
                 self.config_entry = config_entry
-                self.config_entry.data=dict(self.config_entry.data)
-                monox_updater.get_monox_info(self.config_entry.data[CONF_HOST],self.config_entry.data)
-
+                self.config_entry.data = dict(self.config_entry.data)
+                monox_updater.get_monox_info(
+                    self.config_entry.data[CONF_HOST], self.config_entry.data
+                )
 
         except AttributeError:
             self.config_entry = ConfigEntry(
@@ -75,60 +81,50 @@ class AnycubicUartWifiDevice:
             self.config_entry.data[CONF_NAME] = None
             self.config_entry.data["sw_version"] = "unknown version"
 
-        # unassigned_arps = arp_config.get_unattached_devices(hass)
-        # if len(unassigned_arps) > 0:
-        #     arp = unassigned_arps[0]
-        #     config_entry.data[CONF_HOST] = arp["IP address"]
-        #     config_entry.data[CONF_MAC] = arp["HW address"]
-        # sysinfo = self.api.get_sysinfo()
-        # self.fw_version = sysinfo.firmware
-        # config_entry.data[CONF_MODEL] = sysinfo.model
-        # config_entry.data[CONF_UNIQUE_ID] = sysinfo.serial
-
     @property
-    def ip_address(self):
+    def ip_address(self)->str|None:
         """Return the host address of this device."""
         return self.config_entry.data[CONF_HOST]
 
     @property
-    def port(self):
+    def port(self)->int|str|None:
         """Return the UART_WIFI port of this device."""
         return self.config_entry.data[CONF_PORT]
 
     @property
-    def fw_version(self):
+    def fw_version(self)->str|None:
         """Return the UART_WIFI port of this device."""
         return self.config_entry.data[SW_VERSION]
 
     @property
-    def model(self):
+    def model(self)->str|None:
         """Return the model of this device."""
         return self.config_entry.data[CONF_MODEL]
 
     @property
-    def name(self):
+    def name(self)->str|None:
         """Return the name of this device."""
         return self.config_entry.data[CONF_NAME]
 
     @property
-    def unique_id(self):
+    def unique_id(self)->str:
         """Return the unique ID (serial number) of this device."""
         return DOMAIN + "." + self.config_entry.data[CONF_SERIAL]
 
     @property
-    def serial(self):
+    def serial(self)->str|None:
         """Return the unique ID (serial number) of this device."""
         return self.config_entry.data[CONF_SERIAL]
 
     @property
-    def mac_address(self):
+    def mac_address(self)->str|None:
         """Return the mac of this device."""
         return self.config_entry.data[CONF_MAC]
 
     @property
-    def api(self) -> MonoX:
+    def api(self) -> MonoXAPI:
         """Return the unique ID (serial number) of this device."""
-        return MonoX(self.config_entry.data[CONF_HOST])
+        return MonoXAPI(self.config_entry.data[CONF_HOST], UART_WIFI_PORT)
 
     @property
     def product_type(self) -> str:
@@ -136,43 +132,28 @@ class AnycubicUartWifiDevice:
         return "3D Printer"
 
     @property
-    def available(self) -> MonoX:
+    def available(self) -> bool:
         """Return the unique ID (serial number) of this device."""
         return True
 
-    def shutdown(self):
+    def shutdown(self)->None:
         """shutdown method"""
         # do the shutdown
 
     # Options
 
     @property
-    def option_events(self):
+    def option_events(self)->Any:
         """Config entry option defining if platforms based on events should be created."""
         return self.config_entry.options.get(CONF_EVENTS, DEFAULT_EVENTS)
 
     @property
-    def signal_reachable(self):
-        """Device specific event to signal a change in connection status."""
-        return f"axis_reachable_{self.unique_id}"
-
-    @property
-    def signal_new_event(self):
-        """Device specific event to signal new device event available."""
-        return f"axis_new_event_{self.unique_id}"
-
-    @property
-    def signal_new_address(self):
-        """Device specific event to signal a change in device address."""
-        return f"axis_new_address_{self.unique_id}"
-
-    @property
-    def copyright(self):
+    def copyright(self)->str:
         """copyright."""
         return "GPLv3"
 
     @property
-    def credits(self):
+    def credits(self)->str:
         """credits."""
         return "Adam Outler <adamoutler@gmail.com>"
 
@@ -192,7 +173,7 @@ class AnycubicUartWifiDevice:
         device.api.config.host = device.host
         async_dispatcher_send(hass, device.signal_new_address)
 
-    async def async_update_device_registry(self):
+    async def async_update_device_registry(self)->None:
         """Update device registry."""
         device_registry = dr.async_get(self.hass)
         device_registry.async_get_or_create(
@@ -209,36 +190,21 @@ class AnycubicUartWifiDevice:
         try:
             if CONF_HOST in self.config_entry.as_dict().keys():
                 # we are already setup.
-                if (self.config_entry.data[CONF_HOST] is not None):
-                    self.api = await get_anycubic_device(self.hass, self.config_entry.data[CONF_HOST])
-
+                if self.config_entry.data[CONF_HOST] is not None:
+                    self.api = await get_anycubic_device(
+                        self.hass, self.config_entry.data[CONF_HOST]
+                    )
 
         except KeyError as err:
             raise ConfigEntryNotReady from err
 
         async def start_platforms():
             await asyncio.gather(
-                *(
-                    self.hass.config_entries.async_forward_entry_setup(
+                *( self.hass.config_entries.async_forward_entry_setup(
                         self.config_entry, platform
-                    )
-                    for platform in PLATFORMS
+                    ) for platform in PLATFORMS
                 )
             )
-
-        @callback
-        def async_event_callback(self, action, event_id):
-            """Call to configure events when initialized on event stream."""
-            if action is not None:
-                async_dispatcher_send(self.hass, self.signal_new_event, event_id)
-
-        @callback
-        def async_connection_status_callback(self, status):
-            """Handle signals of device connection status.
-
-            This is called on every RTSP keep-alive message.
-            Only signal state change if state change is true.
-            """
 
         self.hass.async_create_task(start_platforms())
         self.config_entry.add_update_listener(self.async_new_address_callback)
@@ -246,13 +212,13 @@ class AnycubicUartWifiDevice:
         return True
 
 
-def get_anycubic_device(hass, ip_address):
+def get_anycubic_device(hass, ip_address) -> MonoXAPI | None:
     """Create a Axis device."""
 
     device = AnycubicUartWifiDevice(hass, {CONF_HOST: ip_address})
 
     try:
-        MonoX(device.ip_address).get_status()
+        MonoXAPI(device.ip_address, UART_WIFI_PORT).getstatus()
         return device
 
     except (asyncio.TimeoutError) as err:
