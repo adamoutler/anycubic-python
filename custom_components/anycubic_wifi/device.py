@@ -5,7 +5,7 @@ from queue import Empty
 from types import MappingProxyType
 from typing import Any
 
-from config.custom_components.anycubic_wifi.api import MonoXAPI
+from .api import MonoXAPI
 from . import monox_updater
 
 from .errors import CannotConnect
@@ -194,7 +194,9 @@ class AnycubicUartWifiDevice:
                     self.api = await get_anycubic_device(
                         self.hass, self.config_entry.data[CONF_HOST]
                     )
-                    monox_updater.map_sysinfo_to_data(self.api.sysinfo(), self.config_entry.data)
+                    monox_updater.map_sysinfo_to_data(
+                        self.api.sysinfo(), self.config_entry.data
+                    )
 
         except KeyError as err:
             raise ConfigEntryNotReady from err
