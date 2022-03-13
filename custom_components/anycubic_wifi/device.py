@@ -5,7 +5,7 @@ from queue import Empty
 from types import MappingProxyType
 from typing import Any
 
-from config.custom_components.anycubic_wifi.api import MonoXAPI
+from .api import MonoXAPI
 from . import monox_updater
 
 from .errors import CannotConnect

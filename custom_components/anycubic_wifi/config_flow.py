@@ -6,7 +6,7 @@ import logging
 from typing import Any
 import voluptuous as vol
 
-from config.custom_components.anycubic_wifi.api import MonoXAPI
+from .api import MonoXAPI
 
 from .device import AnycubicUartWifiDevice
 from uart_wifi.response import MonoXResponseType
@@ -38,7 +38,7 @@ class MyConfigFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
     VERSION = 1
 
-    def __init__(self)->None:
+    def __init__(self) -> None:
         """Initialize the Anycubic MonoX config flow."""
         self.device_config = {}
         self.discovery_schema = {}
@@ -80,7 +80,7 @@ class MyConfigFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         """Gather information from a discovered device"""
         if discovered_information[CONF_HOST] is not None:
             get_monox_info(discovered_information[CONF_HOST], self.data)
-            if (CONF_SERIAL in self.data):
+            if CONF_SERIAL in self.data:
                 await self.async_set_unique_id(DOMAIN + "." + self.data[CONF_SERIAL])
             else:
                 await self.async_set_unique_id(DOMAIN + "." + self.data[CONF_SERIAL])
@@ -94,7 +94,7 @@ class MyConfigFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             )
         return self.async_abort(reason="ip_not_found")
 
-    async def _process_discovered_device(self, device: dict)->Any:
+    async def _process_discovered_device(self, device: dict) -> Any:
         """Prepare configuration for a discovered Axis device."""
 
         get_monox_info(device[CONF_HOST], dict)
