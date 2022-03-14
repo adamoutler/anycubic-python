@@ -10,8 +10,7 @@ from uart_wifi.response import MonoXResponseType
 PORT = 6000
 HELP = (
     __file__
-    + """
-monox.py | Adam Outler (monox@hackedyour.info) | GPLv3
+    + """ | Adam Outler (monox@hackedyour.info) | GPLv3
 
 Usage: monox.py -i <ip address> -c <command>
 args:
@@ -56,7 +55,7 @@ args:
 
 
 try:
-    opts, args = getopt.gnu_getopt(sys.argv, "hi:c:", ["ipaddress=", "command="])
+    opts, args = getopt.gnu_getopt(sys.argv, "hi:c:p:", ["ipaddress=", "command=","port="])
 # pylint: disable=broad-except
 except Exception as e:
     print(HELP)
@@ -68,6 +67,8 @@ for opt, arg in opts:
         sys.exit()
     elif opt in ("-i", "--ipaddress"):
         ip_address = arg
+    elif opt in ("-p", "--port"):
+        PORT = int(arg)
     elif opt in ("-c", "--command"):
         command = arg
         print(arg)

@@ -5,20 +5,43 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "args": ["-i", "192.168.1.254", "--command=sysinfo"],
-      "name": "Python: sysinfo",
+      "args": ["-i", "0.0.0.0", "-p6005"],
+      "name": "Server",
+      "type": "python",
+      "request": "launch",
+      "program": "src/uart_wifi/scripts/fake_printer.py",
+      "console": "integratedTerminal"
+    },
+    {
+      "args": ["-i","127.0.0.1", "-p","6005", "--command=getstatus"],
+      "name": "Client",
       "type": "python",
       "request": "launch",
       "program": "src/uart_wifi/scripts/monox.py",
       "console": "integratedTerminal"
     },
     {
-      "args": ["-i", "192.168.1.254", "--command=getPreview2,0.pwmb,end"],
-      "name": "Python: sysinfo",
+      "args": ["-i","127.0.0.1", "-p","6005", "--command=goprint,1.pwmb,end"],
+      "name": "Client2",
       "type": "python",
       "request": "launch",
       "program": "src/uart_wifi/scripts/monox.py",
       "console": "integratedTerminal"
+    }
+    ,
+    {
+      "args": ["-i","127.0.0.1", "-p","6005", "--command=getstatus"],
+      "name": "Client3",
+      "type": "python",
+      "request": "launch",
+      "program": "src/uart_wifi/scripts/monox.py",
+      "console": "integratedTerminal"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Server/Client",
+      "configurations": ["Server", "Client", "Client2", "Client3"]
     }
   ]
 }

@@ -3,6 +3,7 @@
 import getopt
 import socket
 import sys
+import time
 
 
 class AnycubicSimulator:
@@ -18,6 +19,7 @@ class AnycubicSimulator:
         self.port = the_port
         self.printing = False
         self.serial = "234234234"
+        self.my_socket:socket
 
     def sysinfo(self) -> str:
         """return sysinfo type"""
@@ -57,16 +59,17 @@ class AnycubicSimulator:
 
     def start_server(self):
         """Start the uart_wifi simualtor server"""
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as my_socket:
+        self.my_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.my_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.my_socket.bind((self.ip_address, self.port))
+        self.my_socket.listen(5)
+        while True:
             try:
-                my_socket.bind((self.ip_address, self.port))
-                my_socket.listen()
-                conn, addr = my_socket.accept()
+                conn, addr = self.my_socket.accept()
                 data_received = ""
-                with conn:
-                    print(f"Connected by {addr}")
-                    while True:
-
+                while not data_received.endswith("\n"):
+                    with conn:
+                        print(f"Connected by {addr}")
                         data = conn.recv(1024)
                         if not data:
                             break
@@ -89,9 +92,10 @@ class AnycubicSimulator:
                                 conn.sendall(self.gostop().encode())
                             if data_received.startswith("getmode"):
                                 conn.sendall("getmode,0,end".encode())
-                            data_received = ""
+            except Exception:  # pylint: disable=broad-except
+                pass
             finally:
-                my_socket.close()
+                time.sleep(1)
 
 
 opts, args = getopt.gnu_getopt(sys.argv, "i:p:", ["ipaddress=", "port="])
