@@ -72,7 +72,10 @@ class MyConfigFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     async def async_step_dhcp(self, discovery_info: dhcp.DhcpServiceInfo) -> FlowResult:
         """Prepare configuration for a DHCP discovered Anycubic uart-wifi device."""
         if discovery_info.ip is not None:
-            return await self._process_discovered_device({CONF_HOST: discovery_info.ip})
+            discovered_information = {}
+            discovered_information[CONF_HOST] = str(discovery_info.ip)
+            self.data = {}
+            return await self._process_discovered_device(discovered_information)
 
     async def process_discovered_device(
         self, discovered_information: dict
@@ -94,7 +97,7 @@ class MyConfigFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     async def _process_discovered_device(self, device: dict) -> Any:
         """Prepare configuration for a discovered Axis device."""
 
-        get_monox_info(device[CONF_HOST], dict)
+        get_monox_info(device[CONF_HOST], device)
         await self.async_set_unique_id(DOMAIN + "." + device[CONF_SERIAL])
 
         self._abort_if_unique_id_configured(

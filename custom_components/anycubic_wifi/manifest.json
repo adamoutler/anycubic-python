@@ -10,5 +10,7 @@
   "dependencies": [],
   "version":"1",
   "codeowners": [ "@adamoutler" ],
-  "iot_class": "local_polling"
+  "iot_class": "local_polling",
+  "dhcp": [{"hostname":"uart-wifi","macaddress":"286DCD*"}]
+
 }
