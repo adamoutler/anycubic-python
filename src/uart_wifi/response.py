@@ -85,27 +85,38 @@ class MonoXSysInfo(MonoXResponseType):
         print("wifi: " + self.wifi)
 
 
-class MonoXStatus(MonoXResponseType): #pylint: disable=too-many-instance-attributes
+class MonoXStatus(MonoXResponseType):  # pylint: disable=too-many-instance-attributes
     """Status object for MonoX.
 
     eg message.
         getstatus
         getstatus,stop
     """
+
     def __init__(self, message) -> None:
 
         self.status = message[1]
         if len(message) > 3:
             self.file = message[2]
+        if len(message) > 4:
             self.total_layers = message[3]
+        if len(message) > 5:
             self.layers_remaining = message[4]
+        if len(message) > 6:
             self.current_layer = message[5]
+        if len(message) > 7:
             self.seconds_elapse = message[6]
+        if len(message) > 8:
             self.seconds_remaining = message[7]
+        if len(message) > 9:
             self.total_volume = message[8]
+        if len(message) > 10:
             self.mode = message[9]
+        if len(message) > 11:
             self.unknown1 = message[10]
+        if len(message) > 12:
             self.layer_height = message[11]
+        if len(message) > 13:
             self.unknown2 = message[12]
 
     def print(self):
