@@ -97,9 +97,9 @@ class MonoXSensor(SensorEntity, AnycubicUartEntityBase):
         self._attr_extra_state_attributes = {}
 
         if response is not None:
-            if hasattr(response,"status"):
+            if hasattr(response, "status"):
                 self._attr_native_value = response.status.strip()
-                self._attr_state=self._attr_native_value
+                self._attr_state = self._attr_native_value
 
             if hasattr(response, "current_layer"):
                 self.set_attr_int(_ATTR_CURLAYER, int(response.current_layer))
@@ -121,7 +121,9 @@ class MonoXSensor(SensorEntity, AnycubicUartEntityBase):
             if hasattr(response, "total_volume"):
                 self.set_attr_int(
                     _ATTR_PRINTVOL,
-                    int(response.total_volume.replace("~", "", 1).replace("mL", "", 1)),
+                    float(
+                        response.total_volume.replace("~", "", 1).replace("mL", "", 1)
+                    ),
                 )
 
         self.hass.states.async_set(
