@@ -34,6 +34,7 @@ Any = object()
 
 class UartWifi:  # pylint: disable=too-few-public-methods
     """Mono X Class"""
+    raw=false
 
     def __init__(self, ip_address: str, port: int) -> None:
         self.server_address = (ip_address, port)
@@ -43,6 +44,8 @@ class UartWifi:  # pylint: disable=too-few-public-methods
         """sends the Mono X request."""
         request: str = bytes(message_to_be_sent, "utf-8")
         received: str = _do_request(self.telnet_socket, self.server_address, request)
+        if raw:
+            return received
         processed: MonoXResponseType = _do_handle(received)
         return processed
 
