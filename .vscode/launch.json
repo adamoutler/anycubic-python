@@ -13,7 +13,7 @@
       "console": "integratedTerminal"
     },
     {
-      "args": ["-i","127.0.0.1", "-p","6005", "--command=getstatus"],
+      "args": ["-i", "127.0.0.1", "--raw", "-p", "6005", "--command=getstatus"],
       "name": "Client",
       "type": "python",
       "request": "launch",
@@ -21,17 +21,31 @@
       "console": "integratedTerminal"
     },
     {
-      "args": ["-i","127.0.0.1", "-p","6005", "--command=goprint,1.pwmb,end"],
+      "args": [
+        "-i",
+        "127.0.0.1",
+        "-p",
+        "6005",
+        "--raw",
+        "--command=goprint,1.pwmb,end"
+      ],
       "name": "Client2",
       "type": "python",
       "request": "launch",
       "program": "src/uart_wifi/scripts/monox.py",
       "console": "integratedTerminal"
-    }
-    ,
+    },
     {
-      "args": ["-i","127.0.0.1", "-p","6005", "--command=getstatus"],
+      "args": ["-i", "127.0.0.1", "-p", "6005", "--command=getstatus"],
       "name": "Client3",
+      "type": "python",
+      "request": "launch",
+      "program": "src/uart_wifi/scripts/monox.py",
+      "console": "integratedTerminal"
+    },
+    {
+      "args": ["-i", "127.0.0.1", "-p", "6005", "--command=shutdown"],
+      "name": "Client4",
       "type": "python",
       "request": "launch",
       "program": "src/uart_wifi/scripts/monox.py",
@@ -41,7 +55,7 @@
   "compounds": [
     {
       "name": "Server/Client",
-      "configurations": ["Server", "Client", "Client2", "Client3"]
+      "configurations": ["Server", "Client", "Client2"]
     }
   ]
 }

@@ -92,6 +92,8 @@ class AnycubicSimulator:
                                 conn.sendall(self.gostop().encode())
                             if data_received.startswith("getmode"):
                                 conn.sendall("getmode,0,end".encode())
+                            if (data_received.startswith("shutdown")):
+                                sys.exit()
             except Exception:  # pylint: disable=broad-except
                 pass
             finally:

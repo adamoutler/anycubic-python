@@ -55,16 +55,21 @@ args:
 
 
 try:
-    opts, args = getopt.gnu_getopt(sys.argv, "hi:c:p:", ["ipaddress=", "command=","port="])
+    opts, args = getopt.gnu_getopt(
+        sys.argv, "rhi:c:p:", ["raw", "ipaddress=", "command=", "port="]
+    )
 # pylint: disable=broad-except
 except Exception as e:
     print(HELP)
     sys.exit(0)
 
+USE_RAW = False
 for opt, arg in opts:
     if opt == "-h":
         print(HELP)
         sys.exit()
+    elif opt in ("-r", "--raw"):
+        USE_RAW = True
     elif opt in ("-i", "--ipaddress"):
         ip_address = arg
     elif opt in ("-p", "--port"):
@@ -75,10 +80,17 @@ for opt, arg in opts:
 
 if "ip_address" not in locals():
     print("You must specify the host ip address (-i xxx.xxx.xxx.xxx)")
+    sys.exit(1)
+
+uart = UartWifi(ip_address, PORT)
+
+if USE_RAW:
+    uart.raw = True
+
 if "command" not in locals():
-    response = UartWifi(ip_address, PORT).send_request("getstatus")
+    response = uart.send_request("getstatus")
 else:
-    response = UartWifi(ip_address, PORT).send_request(command)
+    response = uart.send_request(command)
 
 if isinstance(response, MonoXResponseType):
     response.print()
