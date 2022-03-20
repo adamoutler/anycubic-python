@@ -3,7 +3,7 @@
   "domain": "anycubic_wifi",
   "config_flow": true,
   "documentation": "https://www.home-assistant.io/integrations/anycubic_wifi",
-  "requirements": ["uart-wifi"],
+  "requirements": ["uart-wifi==0.0.5.1"],
   "ssdp": [],
   "zeroconf": [],
   "homekit": {},
