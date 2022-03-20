@@ -34,7 +34,7 @@ Any = object()
 
 class UartWifi:  # pylint: disable=too-few-public-methods
     """Mono X Class"""
-    raw=false
+    raw = false
 
     def __init__(self, ip_address: str, port: int) -> None:
         self.server_address = (ip_address, port)
