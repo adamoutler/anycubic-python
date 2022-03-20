@@ -101,11 +101,14 @@ class MonoXStatus(MonoXResponseType):  # pylint: disable=too-many-instance-attri
         if len(message) > 4:
             self.total_layers = message[3]
         if len(message) > 5:
-            self.layers_remaining = message[4]
+            self.unknown = message[4]
         if len(message) > 6:
             self.current_layer = message[5]
         if len(message) > 7:
-            self.seconds_elapse = message[6]
+            if str(message[6]).isnumeric():
+                self.seconds_elapse = int(message[6]) * 60
+            else:
+                self.seconds_elapse = message[6]
         if len(message) > 8:
             self.seconds_remaining = message[7]
         if len(message) > 9:
@@ -124,7 +127,7 @@ class MonoXStatus(MonoXResponseType):  # pylint: disable=too-many-instance-attri
         if hasattr(self, "file"):
             print("file: " + self.file)
             print("total_layers: " + str(self.total_layers))
-            print("layers_remaining: " + str(self.layers_remaining))
+            print("unknown: " + str(self.unknown))
             print("current_layer: " + str(self.current_layer))
             print("seconds_remaining: " + str(self.seconds_remaining))
             print("total_volume: " + str(self.total_volume))
