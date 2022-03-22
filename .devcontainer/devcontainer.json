@@ -48,8 +48,18 @@
     "ms-python.vscode-pylance",
     "visualstudioexptteam.vscodeintellicode",
     "redhat.vscode-yaml",
-    "esbenp.prettier-vscode"
+    "esbenp.prettier-vscode",
+    "xirider.livecode"
   ],
+  "containerEnv": {
+    "PYTHONPATH ": "/workspaces/anycubic-python/src",
+    "MY_CONTAINER_VAR2": "${localEnv:SOME_LOCAL_VAR}"
+  },
+  "remoteEnv": {
+    "PYTHONPATH": "${containerEnv:PYTHONPATH }:/workspaces/anycubic-python/src",
+    "MY_REMOTE_VARIABLE": "some-other-value-here",
+    "MY_REMOTE_VARIABLE2": "${localEnv:SOME_LOCAL_VAR}"
+  },
   // Use 'forwardPorts' to make a list of ports inside the container available locally.
   "forwardPorts": [6000],
   // Use 'postCreateCommand' to run commands after the container is created.

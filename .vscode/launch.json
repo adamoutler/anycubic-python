@@ -13,7 +13,7 @@
       "console": "integratedTerminal"
     },
     {
-      "args": ["-i", "127.0.0.1", "--raw", "-p", "6005", "--command=getstatus"],
+      "args": ["-i", "127.0.0.1", "-p", "6005", "--command=getstatus"],
       "name": "Client",
       "type": "python",
       "request": "launch",
@@ -55,7 +55,7 @@
   "compounds": [
     {
       "name": "Server/Client",
-      "configurations": ["Server", "Client", "Client2"]
+      "configurations": ["Server", "Client4"]
     }
   ]
 }
