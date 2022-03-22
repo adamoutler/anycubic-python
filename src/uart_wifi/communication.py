@@ -8,8 +8,12 @@ from datetime import datetime
 import os
 import sys
 from queue import Empty
-import socket
+
+from socket import AF_INET, SOCK_STREAM, socket
 import tempfile
+from typing import Iterable
+
+from uart_wifi.errors import AnycubicException, ConnectionException
 
 from .response import (
     FileList,
@@ -27,9 +31,11 @@ HOST = "192.168.1.254"
 COMMAND = "getstatus"
 endRequired = ["goprint", "gostop", "gopause", "delfile"]
 END = ",end"
-ENCODING = "utf-8"
+ENCODING = "gbk"
 _LOGGER = logger
 Any = object()
+MAX_REQUEST_TIME = 10  # seconds
+Response = Iterable[MonoXResponseType]
 
 
 class UartWifi:  # pylint: disable=too-few-public-methods
@@ -38,15 +44,15 @@ class UartWifi:  # pylint: disable=too-few-public-methods
     def __init__(self, ip_address: str, port: int) -> None:
         self.server_address = (ip_address, port)
         self.raw = False
-        self.telnet_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.telnet_socket = socket(AF_INET, SOCK_STREAM)
 
     def send_request(self, message_to_be_sent: str) -> MonoXResponseType:
         """sends the Mono X request."""
-        request: str = bytes(message_to_be_sent, "utf-8")
+        request = bytes(message_to_be_sent, "utf-8")
         received: str = _do_request(self.telnet_socket, self.server_address, request)
         if self.raw:
             return received
-        processed: MonoXResponseType = _do_handle(received)
+        processed = _do_handle(received)
         return processed
 
 
@@ -58,13 +64,14 @@ def _do_request(
     :param sock: the socket to use for the request
     :param request: the request to send
     :return: a MonoX object"""
-
+    text_received = ""
     try:
-        _LOGGER.debug("connecting to %s", socket_address)
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.connect(socket_address)
+        sock = _setup_socket(socket_address)
         sock.sendall(to_be_sent)
-        if str(to_be_sent).startswith("b'getPreview2"):
+        sent_string = to_be_sent.decode()
+        if sent_string.endswith("shutdown"):
+            return "shutdown,end"
+        if sent_string.startswith("b'getPreview2"):
             text_received = bytearray()
             print(text_received)
             end_time = datetime.now().microsecond + 10000
@@ -77,17 +84,23 @@ def _do_request(
             text_received = ""
             while not str(text_received).endswith(END):
                 text_received += str(sock.recv(1).decode())
-    except OSError as exception:
-        _LOGGER.error(
-            "Could not connect to AnyCubic printer at %s %s:%s",
-            socket_address,
-            exception.__class__,
-            exception.__cause__,
-        )
-        return None
+
+    except (OSError, ConnectionRefusedError, ConnectionResetError) as exception:
+        raise ConnectionException(
+            "Could not connect to AnyCubic printer at " + socket_address[0]
+        ) from exception
     finally:
         sock.close()
     return text_received
+
+
+def _setup_socket(socket_address):
+    """Setup the socket for communication"""
+    _LOGGER.debug("connecting to %s", socket_address)
+    sock = socket(AF_INET, SOCK_STREAM)
+    sock.connect(socket_address)
+    sock.settimeout(MAX_REQUEST_TIME)
+    return sock
 
 
 def __do_preview2(received_message: bytearray()):
@@ -139,48 +152,41 @@ def __do_preview2(received_message: bytearray()):
     return MonoXPreviewImage("")
 
 
-def _do_handle(message: Any):
+def _do_handle(message: str) -> Iterable[MonoXResponseType]:
     """Perform handling of the message received by the request"""
     if message is None:
         return "no response"
 
-    lines = message.split("end")
-    recognized_response: MonoXResponseType = None
+    lines = message.split(",end")
+    recognized_response: Iterable = list()
     for line in lines:
-        fields = line.split(",")
+        fields: list(str) = line.split(",")
         message_type = fields[0]
         if len(fields) is Empty or len(fields) < 2:
-            print("Done", file=sys.stderr)
             continue
-        if len(fields) < 3:
-            print(
-                f"""Connection established, but no usable data was received.
-            Transcript:\n{line}""",
-                file=sys.stderr,
-            )
-            return ""
         if message_type == "getstatus":
-            recognized_response = __do_status(fields)
+            recognized_response.append(__do_status(fields))
         elif message_type == "getfile":
-            recognized_response = __do_files(fields)
+            recognized_response.append(__do_files(fields))
         elif message_type == "sysinfo":
-            recognized_response = __do_sys_info(fields)
+            recognized_response.append(__do_sys_info(fields))
         elif message_type == "gethistory":
-            recognized_response = __do_get_history(fields)
+            recognized_response.append(__do_get_history(fields))
         elif message_type == "doPreview2":
-            recognized_response = __do_preview2(fields)
+            recognized_response.append(__do_preview2(fields))
         # goprint,49.pwmb,end
         elif message_type in ["goprint", "gostop", "gopause", "getmode", "getwifi"]:
-            recognized_response = fields[1]
+            recognized_response.append(InvalidResponse(fields[1]))
         else:
             print("unrecognized command: " + message_type, file=sys.stderr)
             print(line, file=sys.stderr)
-        if recognized_response is not None:
-            return recognized_response
-        return InvalidResponse(line)
+            if recognized_response is not None:
+                recognized_response.append(InvalidResponse(fields[1]))
+
+    return recognized_response
 
 
-def __do_get_history(fields):
+def __do_get_history(fields: Iterable):
     """Handles history processing."""
     items = []
     for field in fields:
@@ -190,7 +196,7 @@ def __do_get_history(fields):
     return items
 
 
-def __do_sys_info(fields):
+def __do_sys_info(fields: Iterable):
     """Handles system info processing."""
     sys_info = MonoXSysInfo()
     if len(fields) > 2:
@@ -204,13 +210,14 @@ def __do_sys_info(fields):
     return sys_info
 
 
-def __do_files(fields):
+def __do_files(fields: Iterable):
     """Handles file processing."""
     files = FileList(fields)
     return files
 
 
-def __do_status(fields):
+def __do_status(fields: Iterable):
     """Handles status processing."""
     status = MonoXStatus(fields)
+    status.print()
     return status

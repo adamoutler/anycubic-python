@@ -5,7 +5,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "args": ["-i", "0.0.0.0", "-p6005"],
+      "args": ["-i", "0.0.0.0", "-p6005", "-t8"],
       "name": "Server",
       "type": "python",
       "request": "launch",
@@ -55,7 +55,7 @@
   "compounds": [
     {
       "name": "Server/Client",
-      "configurations": ["Server", "Client4"]
+      "configurations": ["Server", "Client2", "Client4"]
     }
   ]
 }

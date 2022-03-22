@@ -1,9 +1,13 @@
 #! python3
 """Uart wifi"""
+
 import getopt
 import sys
+import time
+from typing import Iterable
 
 from uart_wifi.communication import UartWifi
+from uart_wifi.errors import ConnectionException
 from uart_wifi.response import MonoXResponseType
 
 
@@ -82,17 +86,27 @@ if "ip_address" not in locals():
     print("You must specify the host ip address (-i xxx.xxx.xxx.xxx)")
     sys.exit(1)
 
-uart = UartWifi(ip_address, PORT)
+if ip_address == "127.0.0.1":
+    time.sleep(1)
+Responses = None
+# Try 3 times to get the data.
+attempts: int = 0
+while attempts < 3:
+    try:
+        uart = UartWifi(ip_address, PORT)
+        if USE_RAW:
+            uart.raw = True
+        Responses: Iterable[MonoXResponseType] = uart.send_request(command)
+        break
+    except ConnectionException:
+        attempts += 1
 
-if USE_RAW:
-    uart.raw = True
 
-if "command" not in locals():
-    response = uart.send_request("getstatus")
+if Responses != None and isinstance(Responses, list):
+    for response in Responses:
+        if isinstance(response, MonoXResponseType):
+            response.print()
+        else:
+            print(response)
 else:
-    response = uart.send_request(command)
-
-if isinstance(response, MonoXResponseType):
-    response.print()
-else:
-    print(response)
+    print(Responses)

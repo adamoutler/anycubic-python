@@ -13,12 +13,16 @@ class AnycubicSimulator:
     printing = False
     serial = "0000170300020034"
 
-    def __init__(self, the_ip: str, the_port: int) -> None:
+    def __init__(
+        self, the_ip: str, the_port: int, exception_counter_max: int = 5
+    ) -> None:
         self.host = the_ip
         self.port = the_port
         self.printing = False
         self.serial = "234234234"
         self.my_socket: socket
+        self.exception_counter_max = exception_counter_max
+        self.exception_counter = 0
 
     def sysinfo(self) -> str:
         """return sysinfo type"""
@@ -95,24 +99,42 @@ class AnycubicSimulator:
                             if data_received.startswith("getmode"):
                                 conn.sendall("getmode,0,end".encode())
                             if data_received.endswith("shutdown"):
-                                time.sleep(2.4)
                                 self.my_socket.close()
-                                sys.exit()
+                                self.exception_counter = self.exception_counter_max - 1
+
                 print(f"Received: {data_received}")
             except Exception:  # pylint: disable=broad-except
-                pass
+                self.exception_counter += 1
+                if self.exception_counter >= self.exception_counter_max:
+                    break
+
             finally:
                 time.sleep(1)
 
+    @staticmethod
+    def do_shutdown():
+        """Shutdown the printer."""
+        time.sleep(2.4)
 
-opts, args = getopt.gnu_getopt(sys.argv, "i:p:", ["ipaddress=", "port="])
 
-ip_address = "0.0.0.0"
+def start_server(the_ip, port, time_idle):
+    """Starts the server"""
+    AnycubicSimulator(the_ip, int(port), int(time_idle)).start_server()
+
+
+opts, args = getopt.gnu_getopt(sys.argv, "t:i:p:", ["timeidle=", "ipaddress=", "port="])
+
+IP_ADDRESS = "0.0.0.0"
 PORT = 6000
+TIME_IDLE = 5
 for opt, arg in opts:
     if opt in ("-i", "--ipaddress"):
-        ip_address = arg
+        IP_ADDRESS = arg
     elif opt in ("-p", "--port"):
         PORT = arg
-        print(arg)
-AnycubicSimulator(ip_address, int(PORT)).start_server()
+        print("Opening printer on port " + arg)
+    elif opt in ("-t", "--timeidle"):
+        TIME_IDLE = arg
+
+
+start_server(IP_ADDRESS, PORT, TIME_IDLE)
