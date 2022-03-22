@@ -13,8 +13,8 @@ class AnycubicSimulator:
     printing = False
     serial = "0000170300020034"
 
-    def __init__(self, ip_address: str, the_port: int) -> None:
-        self.host = ip_address
+    def __init__(self, the_ip: str, the_port: int) -> None:
+        self.host = the_ip
         self.port = the_port
         self.printing = False
         self.serial = "234234234"
@@ -50,7 +50,7 @@ class AnycubicSimulator:
         return "goprint,OK,end"
 
     def gostop(self) -> str:
-        """Do printing"""
+        """Do Stop printing"""
         if not self.printing:
             return "gostop,ERROR1,end"
         self.printing = False
