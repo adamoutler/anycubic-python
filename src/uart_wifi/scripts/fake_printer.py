@@ -9,7 +9,6 @@ import time
 class AnycubicSimulator:
     """ "Simulator for Anycubic Printer."""
 
-    ip_address = "127.0.0.1"
     port = "6000"
     printing = False
     serial = "0000170300020034"
@@ -19,7 +18,7 @@ class AnycubicSimulator:
         self.port = the_port
         self.printing = False
         self.serial = "234234234"
-        self.my_socket:socket
+        self.my_socket: socket
 
     def sysinfo(self) -> str:
         """return sysinfo type"""
@@ -61,7 +60,7 @@ class AnycubicSimulator:
         """Start the uart_wifi simualtor server"""
         self.my_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.my_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.my_socket.bind((self.ip_address, self.port))
+        self.my_socket.bind((self.host, self.port))
         self.my_socket.listen(5)
         while True:
             try:
@@ -69,11 +68,14 @@ class AnycubicSimulator:
                 data_received = ""
                 while not data_received.endswith("\n"):
                     with conn:
-                        print(f"Connected by {addr}")
+                        print(f"Connected to {addr}")
                         data = conn.recv(1024)
                         if not data:
                             break
                         try:
+                            print("Hex:")
+                            print(" ".join("{:02x}".format(x) for x in data))
+                            print("Data:")
                             decoded_data = data.decode()
                             print(decoded_data)
                         except UnicodeDecodeError:
@@ -92,8 +94,11 @@ class AnycubicSimulator:
                                 conn.sendall(self.gostop().encode())
                             if data_received.startswith("getmode"):
                                 conn.sendall("getmode,0,end".encode())
-                            if (data_received.startswith("shutdown")):
+                            if data_received.endswith("shutdown"):
+                                time.sleep(2.4)
+                                self.my_socket.close()
                                 sys.exit()
+                print(f"Received: {data_received}")
             except Exception:  # pylint: disable=broad-except
                 pass
             finally:
@@ -102,12 +107,12 @@ class AnycubicSimulator:
 
 opts, args = getopt.gnu_getopt(sys.argv, "i:p:", ["ipaddress=", "port="])
 
-IP = "0.0.0.0"
+ip_address = "0.0.0.0"
 PORT = 6000
 for opt, arg in opts:
     if opt in ("-i", "--ipaddress"):
-        IP = arg
+        ip_address = arg
     elif opt in ("-p", "--port"):
         PORT = arg
         print(arg)
-AnycubicSimulator(IP, int(PORT)).start_server()
+AnycubicSimulator(ip_address, int(PORT)).start_server()
