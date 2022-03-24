@@ -82,7 +82,7 @@ def _do_request(
                 text_received.extend(sock.recv(1))
         else:
             text_received = ""
-            while not str(text_received).endswith(END):
+            while not str(text_received).endswith(END) :
                 text_received += str(sock.recv(1).decode())
 
     except (OSError, ConnectionRefusedError, ConnectionResetError) as exception:

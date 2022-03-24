@@ -60,7 +60,7 @@ args:
 
 try:
     opts, args = getopt.gnu_getopt(
-        sys.argv, "rhi:c:p:", ["raw", "ipaddress=", "command=", "port="]
+        sys.argv, "drhi:c:p:", ["raw", "ipaddress=", "command=", "port="]
     )
 # pylint: disable=broad-except
 except Exception as e:
@@ -72,6 +72,8 @@ for opt, arg in opts:
     if opt == "-h":
         print(HELP)
         sys.exit()
+    elif opt in "d":
+        time.sleep(1)
     elif opt in ("-r", "--raw"):
         USE_RAW = True
     elif opt in ("-i", "--ipaddress"):

@@ -1,10 +1,10 @@
 #! python3
 """Fake Anycubic Printer for tests"""
-from base64 import decode
 import getopt
-from queue import Empty
+import select
 import socket
 import sys
+import threading
 import time
 
 
@@ -14,6 +14,7 @@ class AnycubicSimulator:
     port = "6000"
     printing = False
     serial = "0000170300020034"
+    shutdown_signal = False
 
     def __init__(self, the_ip, the_port, exception_counter_max=5) -> None:
         self.host = the_ip
@@ -62,72 +63,83 @@ class AnycubicSimulator:
         self.my_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.my_socket.bind((self.host, self.port))
         self.my_socket.listen(1)
-        self.my_socket.setblocking(True)
-        while True:
-            try:
-                conn, addr = self.my_socket.accept()
-                print(f"Connected to {addr}")
-                decoded_data = ""
-                with conn:
-                    while True:
-                        self.my_socket.setblocking(True)
-                        while "," not in decoded_data and "\n" not in decoded_data:
-                            data = conn.recv(1)
-                            decoded_data += data.decode()
-                            if "111\n" in decoded_data:
-                                decoded_data = ""
-                                continue
-                        try:
-                            print("Hex:")
-                            print(
-                                " ".join(
-                                    "{:02x}".format(x) for x in decoded_data.encode()
-                                )
-                            )
-                            print("Data:")
-                            print(decoded_data)
-                        except UnicodeDecodeError:
-                            continue
-                        split_data = decoded_data.split(",")
-                        for split in split_data:
-                            if split == "":
-                                continue
-                            if "getstatus" in split:
-                                conn.sendall(self.getstatus().encode())
-                            if "sysinfo" in split:
-                                conn.sendall(self.sysinfo().encode())
-                            if "getfile" in split:
-                                conn.sendall(self.getfile().encode())
-                            if "goprint" in split:
-                                conn.sendall(self.goprint().encode())
-                                decoded_data = ""
-                            if "gostop" in split:
-                                value = self.gostop()
-                                print("sent:" + value)
-                                conn.sendall(value.encode())
-                            if "getmode" in split:
-                                value = "getmode,0,end"
-                                print("sent:" + value)
-                                conn.sendall(value.encode())
-                                decoded_data = ""
+        self.my_socket.setblocking(False)
+        read_list = [self.my_socket]
+        readable, [], [] = select.select(read_list, [], [])
+        while not AnycubicSimulator.shutdown_signal:
+            for s in readable:
+                if s is self.my_socket:
+                    try:
+                        conn, addr = self.my_socket.accept()
+                        thread = threading.Thread(
+                            target=self.response_handler,
+                            args=(self.my_socket, conn, addr),
+                        )
+                        thread.setDaemon(True)
+                        thread.start()
+                    except Exception:  # pylint: disable=broad-except
+                        self.exception_counter += 1
+                        if self.exception_counter >= self.exception_counter_max:
+                            break
 
-                            if decoded_data.endswith("shutdown"):
-                                self.my_socket.close()
-                                self.exception_counter = self.exception_counter_max - 1
+                    finally:
+                        time.sleep(1)
+
+    def do_shutdown(self):
+        """Shutdown the printer."""
+        self.my_socket.close()
+        time.sleep(2.4)
+
+    def response_handler(self, sock, conn, addr):
+        """The connection handler"""
+        print(f"Connected to {addr}")
+        decoded_data = ""
+        with conn:
+            while not AnycubicSimulator.shutdown_signal:
+                while "," not in decoded_data and "\n" not in decoded_data:
+                    data = conn.recv(1)
+                    decoded_data += data.decode()
+                    if "111\n" in decoded_data:
+                        decoded_data = ""
+                        continue
+                try:
+                    print("Hex:")
+                    print(" ".join(f"{hex:02x}" for hex in decoded_data.encode()))
+                    print("Data:")
+                    print(decoded_data)
+                except UnicodeDecodeError:
+                    continue
+                split_data = decoded_data.split(",")
+                for split in split_data:
+                    if split == "":
+                        continue
+                    if "getstatus" in split:
+                        conn.sendall(self.getstatus().encode())
+                    if "sysinfo" in split:
+                        conn.sendall(self.sysinfo().encode())
+                    if "getfile" in split:
+                        conn.sendall(self.getfile().encode())
+                    if "goprint" in split:
+                        conn.sendall(self.goprint().encode())
+                        decoded_data = ""
+                    if "gostop" in split:
+                        value = self.gostop()
+                        print("sent:" + value)
+                        conn.sendall(value.encode())
+                    if "getmode" in split:
+                        value = "getmode,0,end"
+                        print("sent:" + value)
+                        conn.sendall(value.encode())
                         decoded_data = ""
 
-            except Exception:  # pylint: disable=broad-except
-                self.exception_counter += 1
-                if self.exception_counter >= self.exception_counter_max:
-                    break
-
-            finally:
-                time.sleep(1)
-
-    @staticmethod
-    def do_shutdown():
-        """Shutdown the printer."""
-        time.sleep(2.4)
+                    if decoded_data.endswith("shutdown,"):
+                        self.my_socket.close()
+                        value="shutdown,end"
+                        print("sent:" + value)
+                        conn.sendall(value.encode())
+                        AnycubicSimulator.shutdown_signal = True
+                        self.exception_counter = self.exception_counter_max - 1
+                decoded_data = ""
 
 
 def start_server(the_ip, port, time_idle):
