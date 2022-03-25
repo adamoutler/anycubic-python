@@ -6,6 +6,7 @@ The development environment is Visual Studio Code. See launch.json for auto-conf
 from asyncio.log import logger
 from datetime import datetime
 import os
+import select
 import sys
 from queue import Empty
 
@@ -13,7 +14,7 @@ from socket import AF_INET, SOCK_STREAM, socket
 import tempfile
 from typing import Iterable
 
-from uart_wifi.errors import AnycubicException, ConnectionException
+from uart_wifi.errors import  ConnectionException
 
 from .response import (
     FileList,
@@ -81,9 +82,16 @@ def _do_request(
             ):
                 text_received.extend(sock.recv(1))
         else:
-            text_received = ""
-            while not str(text_received).endswith(END) :
-                text_received += str(sock.recv(1).decode())
+
+            read_list = [sock]
+            text_received = str(sock.recv(1).decode())
+
+            end_time = datetime.now().microsecond + 1000
+            while (datetime.now().microsecond < end_time):
+                readable, [], [] = select.select(read_list, [], [])
+                for read_port in readable:
+                    if read_port is sock:
+                        text_received += str(read_port.recv(1).decode())
 
     except (OSError, ConnectionRefusedError, ConnectionResetError) as exception:
         raise ConnectionException(

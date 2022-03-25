@@ -72,7 +72,7 @@ for opt, arg in opts:
     if opt == "-h":
         print(HELP)
         sys.exit()
-    elif opt in "d":
+    elif opt in "-d":
         time.sleep(1)
     elif opt in ("-r", "--raw"):
         USE_RAW = True

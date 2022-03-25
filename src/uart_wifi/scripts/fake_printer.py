@@ -16,14 +16,11 @@ class AnycubicSimulator:
     serial = "0000170300020034"
     shutdown_signal = False
 
-    def __init__(self, the_ip, the_port, exception_counter_max=5) -> None:
+    def __init__(self, the_ip, the_port) -> None:
         self.host = the_ip
         self.port = the_port
         self.printing = False
         self.serial = "234234234"
-        self.my_socket: socket
-        self.exception_counter_max = exception_counter_max
-        self.exception_counter = 0
 
     def sysinfo(self) -> str:
         """return sysinfo type"""
@@ -59,38 +56,30 @@ class AnycubicSimulator:
 
     def start_server(self):
         """Start the uart_wifi simualtor server"""
-        self.my_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.my_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.my_socket.bind((self.host, self.port))
-        self.my_socket.listen(1)
-        self.my_socket.setblocking(False)
-        read_list = [self.my_socket]
-        readable, [], [] = select.select(read_list, [], [])
+        my_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        my_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        my_socket.bind((self.host, self.port))
+        my_socket.listen(1)
+        my_socket.setblocking(False)
+        read_list = [my_socket]
         while not AnycubicSimulator.shutdown_signal:
+            readable, [], [] = select.select(read_list, [], [])
             for s in readable:
-                if s is self.my_socket:
+                if s is my_socket:
                     try:
-                        conn, addr = self.my_socket.accept()
+                        conn, addr = my_socket.accept()
                         thread = threading.Thread(
-                            target=self.response_handler,
-                            args=(self.my_socket, conn, addr),
+                            target=self.response_selector,
+                            args=(conn, addr),
                         )
                         thread.setDaemon(True)
                         thread.start()
                     except Exception:  # pylint: disable=broad-except
-                        self.exception_counter += 1
-                        if self.exception_counter >= self.exception_counter_max:
-                            break
-
+                        pass
                     finally:
                         time.sleep(1)
 
-    def do_shutdown(self):
-        """Shutdown the printer."""
-        self.my_socket.close()
-        time.sleep(2.4)
-
-    def response_handler(self, sock, conn, addr):
+    def response_selector(self, conn, addr):
         """The connection handler"""
         print(f"Connected to {addr}")
         decoded_data = ""
@@ -109,57 +98,66 @@ class AnycubicSimulator:
                     print(decoded_data)
                 except UnicodeDecodeError:
                     continue
-                split_data = decoded_data.split(",")
-                for split in split_data:
-                    if split == "":
-                        continue
-                    if "getstatus" in split:
-                        conn.sendall(self.getstatus().encode())
-                    if "sysinfo" in split:
-                        conn.sendall(self.sysinfo().encode())
-                    if "getfile" in split:
-                        conn.sendall(self.getfile().encode())
-                    if "goprint" in split:
-                        conn.sendall(self.goprint().encode())
-                        decoded_data = ""
-                    if "gostop" in split:
-                        value = self.gostop()
-                        print("sent:" + value)
-                        conn.sendall(value.encode())
-                    if "getmode" in split:
-                        value = "getmode,0,end"
-                        print("sent:" + value)
-                        conn.sendall(value.encode())
-                        decoded_data = ""
-
-                    if decoded_data.endswith("shutdown,"):
-                        self.my_socket.close()
-                        value="shutdown,end"
-                        print("sent:" + value)
-                        conn.sendall(value.encode())
-                        AnycubicSimulator.shutdown_signal = True
-                        self.exception_counter = self.exception_counter_max - 1
+                self.send_response(conn, decoded_data)
                 decoded_data = ""
 
+    def send_response(self, conn, decoded_data):
+        """Send a response"""
+        split_data = decoded_data.split(",")
+        for split in split_data:
+            if split == "":
+                continue
+            if "getstatus" in split:
+                conn.sendall(self.getstatus().encode())
+            if "sysinfo" in split:
+                conn.sendall(self.sysinfo().encode())
+            if "getfile" in split:
+                conn.sendall(self.getfile().encode())
+            if "goprint" in split:
+                conn.sendall(self.goprint().encode())
+                decoded_data = ""
+            if "gostop" in split:
+                value = self.gostop()
+                print("sent:" + value)
+                conn.sendall(value.encode())
+            if "getmode" in split:
+                value = "getmode,0,end"
+                print("sent:" + value)
+                conn.sendall(value.encode())
+                decoded_data = ""
+            if "incomplete" in split:
+                value = "getmode,0,"
+                print("sent:" + value)
+                conn.sendall(value.encode())
+                decoded_data = ""
+            if "multi" in split:
+                value = self.getstatus() + self.sysinfo() + "getmode,0,end"
+                print("sent:" + value)
+                conn.sendall(value.encode())
+                decoded_data = ""
+            if decoded_data.endswith("shutdown,"):
+                value = "shutdown,end"
+                print("sent:" + value)
+                conn.sendall(value.encode())
+                AnycubicSimulator.shutdown_signal = True
 
-def start_server(the_ip, port, time_idle):
+
+def start_server(the_ip, port):
     """Starts the server"""
-    AnycubicSimulator(the_ip, int(port), int(time_idle)).start_server()
+    AnycubicSimulator(the_ip, int(port)).start_server()
 
 
-opts, args = getopt.gnu_getopt(sys.argv, "t:i:p:", ["timeidle=", "ipaddress=", "port="])
+opts, args = getopt.gnu_getopt(sys.argv, "i:p:", [ "ipaddress=", "port="])
 
 IP_ADDRESS = "0.0.0.0"
 PORT = 6000
-TIME_IDLE = 999999999
 for opt, arg in opts:
     if opt in ("-i", "--ipaddress"):
         IP_ADDRESS = arg
     elif opt in ("-p", "--port"):
         PORT = arg
         print("Opening printer on port " + arg)
-    elif opt in ("-t", "--timeidle"):
-        TIME_IDLE = arg
 
 
-start_server(IP_ADDRESS, PORT, TIME_IDLE)
+
+start_server(IP_ADDRESS, PORT)

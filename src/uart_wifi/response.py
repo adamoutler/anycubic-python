@@ -96,30 +96,30 @@ class MonoXStatus(MonoXResponseType):  # pylint: disable=too-many-instance-attri
     def __init__(self, message) -> None:
 
         self.status = message[1]
-        if len(message) > 3:
+        if len(message) > 2:
             self.file = message[2]
-        if len(message) > 4:
+        if len(message) > 3:
             self.total_layers = message[3]
-        if len(message) > 5:
+        if len(message) > 4:
             self.unknown = message[4]
-        if len(message) > 6:
+        if len(message) > 5:
             self.current_layer = message[5]
-        if len(message) > 7:
+        if len(message) > 6:
             if str(message[6]).isnumeric():
                 self.seconds_elapse = int(message[6]) * 60
             else:
                 self.seconds_elapse = message[6]
-        if len(message) > 8:
+        if len(message) > 7:
             self.seconds_remaining = message[7]
-        if len(message) > 9:
+        if len(message) > 8:
             self.total_volume = message[8]
-        if len(message) > 10:
+        if len(message) > 9:
             self.mode = message[9]
-        if len(message) > 11:
+        if len(message) > 10:
             self.unknown1 = message[10]
-        if len(message) > 12:
+        if len(message) > 11:
             self.layer_height = message[11]
-        if len(message) > 13:
+        if len(message) > 12:
             self.unknown2 = message[12]
 
     def print(self):
