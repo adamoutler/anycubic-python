@@ -14,7 +14,7 @@ from socket import AF_INET, SOCK_STREAM, socket
 import tempfile
 from typing import Iterable
 
-from uart_wifi.errors import  ConnectionException
+from uart_wifi.errors import ConnectionException
 
 from .response import (
     FileList,
@@ -82,12 +82,10 @@ def _do_request(
             ):
                 text_received.extend(sock.recv(1))
         else:
-
+            text_received = ""
             read_list = [sock]
-            text_received = str(sock.recv(1).decode())
-
-            end_time = datetime.now().microsecond + 1000
-            while (datetime.now().microsecond < end_time):
+            end_time = datetime.now().microsecond + 10000
+            while datetime.now().microsecond < end_time:
                 readable, [], [] = select.select(read_list, [], [])
                 for read_port in readable:
                     if read_port is sock:
