@@ -83,6 +83,9 @@ class MonoXSensor(SensorEntity, AnycubicUartEntityBase):
         self.monox = MonoXAPI(entry.data[CONF_HOST], UART_WIFI_PORT)
         self.entry = entry
         self.hass = hass
+        self._attr_native_value = ""
+        self._attr_state = ""
+        self._attr_extra_state_attributes = {}
         if not self.name:
             self._attr_name = entry.data[CONF_MODEL]
 
@@ -93,7 +96,7 @@ class MonoXSensor(SensorEntity, AnycubicUartEntityBase):
 
     async def async_update(self) -> None:
         """Fetch new state data for the sensor."""
-        response: MonoXStatus = self.monox.getstatus()
+        response:MonoXStatus = self.monox.getstatus()
         self._attr_extra_state_attributes = {}
 
         if response is not None:

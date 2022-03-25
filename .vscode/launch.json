@@ -5,7 +5,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "args": ["-i", "0.0.0.0", "-p6005", "-t8"],
+      "args": ["-i", "0.0.0.0", "-p6000"],
       "name": "Server",
       "type": "python",
       "request": "launch",
@@ -13,8 +13,8 @@
       "console": "integratedTerminal"
     },
     {
-      "args": ["-i", "127.0.0.1", "-p", "6005", "--command=getstatus"],
-      "name": "Client",
+      "args": ["-i", "127.0.0.1", "-p", "6000", "--command=getstatus,", "-d"],
+      "name": "status",
       "type": "python",
       "request": "launch",
       "program": "src/uart_wifi/scripts/monox.py",
@@ -25,18 +25,36 @@
         "-i",
         "127.0.0.1",
         "-p",
-        "6005",
+        "6000",
         "--raw",
-        "--command=goprint,1.pwmb,end"
+        "--command=goprint,1.pwmb,end",
+        "-d"
       ],
-      "name": "Client2",
+      "name": "print",
       "type": "python",
       "request": "launch",
       "program": "src/uart_wifi/scripts/monox.py",
       "console": "integratedTerminal"
     },
     {
-      "args": ["-i", "127.0.0.1", "-p", "6005", "--command=getstatus"],
+      "args": ["-i", "127.0.0.1", "-p", "6000", "--command=multi,", "-d", "-d"],
+      "name": "multi",
+      "type": "python",
+      "request": "launch",
+      "program": "src/uart_wifi/scripts/monox.py",
+      "console": "integratedTerminal"
+    },
+    {
+      "args": [
+        "-i",
+        "127.0.0.1",
+        "-p",
+        "6000",
+        "--command=getstatus,",
+        "-d",
+        "-d",
+        "-d"
+      ],
       "name": "Client3",
       "type": "python",
       "request": "launch",
@@ -44,8 +62,20 @@
       "console": "integratedTerminal"
     },
     {
-      "args": ["-i", "127.0.0.1", "-p", "6005", "--command=shutdown"],
-      "name": "Client4",
+      "args": [
+        "-i",
+        "127.0.0.1",
+        "-p",
+        "6000",
+        "--command=shutdown,",
+        "-d",
+        "-d",
+        "-d",
+        "-d",
+        "-d",
+        "-d"
+      ],
+      "name": "shutdown",
       "type": "python",
       "request": "launch",
       "program": "src/uart_wifi/scripts/monox.py",
@@ -55,7 +85,7 @@
   "compounds": [
     {
       "name": "Server/Client",
-      "configurations": ["Server", "Client2", "Client4"]
+      "configurations": ["Server", "status", "multi", "shutdown"]
     }
   ]
 }

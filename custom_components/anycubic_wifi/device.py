@@ -217,13 +217,13 @@ class AnycubicUartWifiDevice:
         return True
 
 
-def get_anycubic_device(hass, ip_address) -> MonoXAPI | None:
+async def get_anycubic_device(hass, ip_address) -> MonoXAPI | None:
     """Create a Axis device."""
 
     device = AnycubicUartWifiDevice(hass, {CONF_HOST: ip_address})
 
     try:
-        MonoXAPI(device.ip_address, UART_WIFI_PORT).getstatus()
+        await MonoXAPI(device.ip_address, UART_WIFI_PORT).getstatus()
         return device
 
     except (asyncio.TimeoutError) as err:

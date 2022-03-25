@@ -6,6 +6,10 @@ class AnycubicException(HomeAssistantError):
     """Base class for Axis exceptions."""
 
 
+class AnycubicMonoXAPILevel(AnycubicException):
+    """Problem with API."""
+
+
 class AlreadyConfigured(AnycubicException):
     """Device is already configured."""
 
