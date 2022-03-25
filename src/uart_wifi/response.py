@@ -1,8 +1,8 @@
-"""Mono X Objects"""
+"""Mono X Objects."""
 
 ##pylint: disable=too-few-public-methods
 class MonoXResponseType:
-    """The baseline MonoX State class"""
+    """The baseline MonoX Response class.  Use this to create other MonoX Responses."""
 
     status: str = "error/offline"
 
@@ -15,18 +15,34 @@ class MonoXFileEntry(MonoXResponseType):
     """A file entry consisting of an internal and external listing"""
 
     def __init__(self, internal_name: str, external_name: str) -> None:
+        """Create a MonoXFileEntry
+        :internal_name: the name the printer calls the file. eg "1.pwmb"
+        :external_name: The name the user calls the file. eg "My (Super) Cool.pwmb"
+        """
         self.external = internal_name
         self.internal = external_name
         self.status = "file"
 
     def print(self):
+        """Provide a human-readable response"""
         print(self.internal + ": " + self.external)
 
 
 class FileList(MonoXResponseType):
-    """handles lists of files"""
+    """handles lists of files.
+    eg.
+    getfile,
+    2-phone-stands.pwmb/0.pwmb,
+    SLA print puller supported.pwmb/1.pwmb,
+    2 phone stands on side.pwmb/2.pwmb,
+    5x USB_Cable_Holder_7w_Screws_hollow.pwmb/3.pwmb,
+    end
+    """
 
     def __init__(self, data: MonoXFileEntry) -> None:
+        """Create a FileList object.
+        :data: a list of internal/external files.
+        """
         self.files = []
         self.status = "getfile"
 
@@ -39,39 +55,46 @@ class FileList(MonoXResponseType):
     files = [MonoXFileEntry]
 
     def print(self):
+        """Provide a human-readable response."""
         for file in self.files:
             file.print()
 
 
 class InvalidResponse(MonoXResponseType):
-    """Used when no response is provided"""
+    """Used when no response is provided."""
 
     def __init__(self, message) -> None:
+        """Construct the InvalidResponse type.
+        :message: anything goes
+        """
         self.status = message
 
     def print(self):
+        """Provide a human-readable response."""
         print("Invalid Response: " + self.status)
 
 
 class SimpleResponse(MonoXResponseType):
-    """Used when no response is provided"""
+    """Used when no response is provided."""
 
     def __init__(self, message) -> None:
+        """Construct a SimpleResponse.
+        :message: anything goes."""
         self.status = message
 
     def print(self):
+        """Provide a human-readable response."""
         print("Response: " + self.status)
 
 
 class MonoXSysInfo(MonoXResponseType):
     """The sysinfo handler. Handles sysinfo messages.
-
     eg message.
-        sysinfo
         sysinfo,Photon Mono X 6K,V0.2.2,0000170300020034,SkyNet,end
     """
 
     def __init__(self, model="", firmware="", serial="", wifi="") -> None:
+        """Construct the MonoXSysInfo response type"""
         self.model = model
         self.firmware = firmware
         self.serial = serial
@@ -79,6 +102,7 @@ class MonoXSysInfo(MonoXResponseType):
         self.status = "updated"
 
     def print(self):
+        """Provide a human-readable response"""
         print("model: " + self.model)
         print("firmware: " + self.firmware)
         print("serial: " + self.serial)
@@ -89,11 +113,12 @@ class MonoXStatus(MonoXResponseType):  # pylint: disable=too-many-instance-attri
     """Status object for MonoX.
 
     eg message.
-        getstatus
-        getstatus,stop
+       getstatus,print,Widget.pwmb/46.pwmb,2338,88,2062,51744,6844,~178mL,UV,39.38,0.05,0,end
     """
 
     def __init__(self, message) -> None:
+        """Construct the Status response.
+        :message: a properly formated message of either length 3 or >12."""
 
         self.status = message[1]
         if len(message) > 2:
@@ -123,6 +148,7 @@ class MonoXStatus(MonoXResponseType):  # pylint: disable=too-many-instance-attri
             self.unknown2 = message[12]
 
     def print(self):
+        """Provide a human-readable response."""
         print("status: " + self.status)
         if hasattr(self, "file"):
             print("file: " + self.file)
@@ -138,12 +164,16 @@ class MonoXStatus(MonoXResponseType):  # pylint: disable=too-many-instance-attri
 
 
 class MonoXPreviewImage(MonoXResponseType):
-    """A file entry consisting of an internal and external listing"""
+    """A file entry consisting of an internal and external listing."""
 
     def __init__(self, file_path: str) -> None:
+        """Construct the MonoXPreviewImage.
+        :file_path: the path to the preview image.
+        """
         super().__init__()
         self.file_path = file_path
         self.status = "preview image"
 
     def print(self):
+        """Provide a human-readable response."""
         print(f"preview located at {self.file_path}")

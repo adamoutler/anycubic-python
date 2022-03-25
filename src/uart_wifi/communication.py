@@ -43,12 +43,19 @@ class UartWifi:  # pylint: disable=too-few-public-methods
     """Mono X Class"""
 
     def __init__(self, ip_address: str, port: int) -> None:
+        """Create a communications UartWifi class.
+        :ip_address: The IP to initiate communications with.
+        :port: The port to use.
+        """
         self.server_address = (ip_address, port)
         self.raw = False
         self.telnet_socket = socket(AF_INET, SOCK_STREAM)
 
     def send_request(self, message_to_be_sent: str) -> MonoXResponseType:
-        """sends the Mono X request."""
+        """sends the Mono X request.
+        :message_to_be_sent: The properly-formatted uart-wifi message as it is to be sent.
+        :returns: an object from Response class.
+        """
         request = bytes(message_to_be_sent, "utf-8")
         received: str = _do_request(self.telnet_socket, self.server_address, request)
         if self.raw:
@@ -101,7 +108,9 @@ def _do_request(
 
 
 def _setup_socket(socket_address):
-    """Setup the socket for communication"""
+    """Setup the socket for communication
+    socket_address: the tupple consisting of (ip_address, port).
+    """
     _LOGGER.debug("connecting to %s", socket_address)
     sock = socket(AF_INET, SOCK_STREAM)
     sock.connect(socket_address)
@@ -110,7 +119,9 @@ def _setup_socket(socket_address):
 
 
 def __do_preview2(received_message: bytearray()):
-    """Handles preview by writing to file."""
+    """Handles preview by writing to file.
+    :received_message: The message, as received from UART wifi protocol, to be converted to an image.
+    """
 
     filename = received_message.decode("utf_8").split(",", 3)[1]
     file = tempfile.gettempdir() + os.path.sep + filename + ".bmp"

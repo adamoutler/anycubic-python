@@ -16,7 +16,11 @@ class AnycubicSimulator:
     serial = "0000170300020034"
     shutdown_signal = False
 
-    def __init__(self, the_ip, the_port) -> None:
+    def __init__(self, the_ip: str, the_port: int) -> None:
+        """Construct the Anycubic Simulator
+        :the_ip: The IP address to use internally for opening the port. eg. 127.0.0.1, or 0.0.0.0
+        :the_port: The port to monitor for responses.
+        """
         self.host = the_ip
         self.port = the_port
         self.printing = False
@@ -26,8 +30,7 @@ class AnycubicSimulator:
         """return sysinfo type"""
         return "sysinfo,Photon Mono X 6K,V0.2.2," + self.serial + ",SkyNet,end"
 
-    @staticmethod
-    def getfile() -> str:
+    def getfile(self) -> str:
         """return getfile type"""
         return "getfile,Widget.pwmb/0.pwmb,end"
 
@@ -79,8 +82,11 @@ class AnycubicSimulator:
                     finally:
                         time.sleep(1)
 
-    def response_selector(self, conn, addr):
-        """The connection handler"""
+    def response_selector(self, conn: socket.socket, addr) -> None:
+        """The connection handler
+        :conn: The connection to use
+        :addr: address tuple for ip and port
+        """
         print(f"Connected to {addr}")
         decoded_data = ""
         with conn:
@@ -101,8 +107,12 @@ class AnycubicSimulator:
                 self.send_response(conn, decoded_data)
                 decoded_data = ""
 
-    def send_response(self, conn, decoded_data):
-        """Send a response"""
+    def send_response(self, conn: socket.socket, decoded_data: str) -> None:
+        """Send a response
+
+        :conn: The connection to use
+        :addr: address tuple for ip and port
+        """
         split_data = decoded_data.split(",")
         for split in split_data:
             if split == "":
@@ -142,12 +152,15 @@ class AnycubicSimulator:
                 AnycubicSimulator.shutdown_signal = True
 
 
-def start_server(the_ip, port):
-    """Starts the server"""
+def start_server(the_ip: str, port: int) -> None:
+    """Starts the server
+    :the_ip: The IP address to use internally for opening the port. eg. 127.0.0.1, or 0.0.0.0
+    :the_port: The port to monitor for responses.
+    """
     AnycubicSimulator(the_ip, int(port)).start_server()
 
 
-opts, args = getopt.gnu_getopt(sys.argv, "i:p:", [ "ipaddress=", "port="])
+opts, args = getopt.gnu_getopt(sys.argv, "i:p:", ["ipaddress=", "port="])
 
 IP_ADDRESS = "0.0.0.0"
 PORT = 6000
@@ -157,7 +170,6 @@ for opt, arg in opts:
     elif opt in ("-p", "--port"):
         PORT = arg
         print("Opening printer on port " + arg)
-
 
 
 start_server(IP_ADDRESS, PORT)
