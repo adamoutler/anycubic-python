@@ -1,7 +1,0 @@
-{
-    "name": "Anycubic 3D Printer",
-    "country": "US",
-    "domains": ["sensor"],
-    "homeassistant": "2022.3",
-    "render_readme":false
-  }

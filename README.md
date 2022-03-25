@@ -50,33 +50,3 @@ A command line script to simulate a MonoX 3D printer for testing purposes. You c
      [-i, [--ipaddress=]] - The IP address which to acknowledge requests. This defaults to any or 0.0.0.0.
 
      [-p [--port=]] - The port to listen on. This defaults to 6000.
-# Home Assistant Integration
-
-## Features
-Assign automations based on print/stop state:
-
-
-Clean layout:![](img/monoxdevice.png)
-Extra detail when printing:![](img/sensor.png)
-Automatic Discovery:![](img/configure.png)
-
-
-## Installation
-To install, just add this repository to HACS.
-
-The basic operation is simple. First you'll need to install [HACS](https://hacs.xyz/docs/setup/download). Then from within HACS click Integration
-![](img/1clickintegration.png)
-Select the menu from the top right, and click Custom repositories.
-![](img/2clickcustomrepo.png)
-Add this repository
-![](img/3addcustomrepo.png)
-
-From within the same screen, click the Explore & Download Repositories button, and then type AnyCubic Pyhon to install. The process should be self-explanatory after this.
-![](img/4exploreanddownload.png)
-
-After installation, Home Assistant will requrie a reboot.  Upon reboot, device detection will occur.  Within your settings>Devices you should see a prompt for automatic discovery.  Click this to install.
-![](img/configure.png)
-
-![](img/discovered.png)
-
-![](img/assignaroom.png)
