@@ -48,7 +48,6 @@ jobs:
     needs:
       - build
       - pylint
-    if: startsWith(github.ref, 'refs/tags/PyPI')
     runs-on: ubuntu-18.04
     name: Publish distribution 📦 to PyPI
     steps:
