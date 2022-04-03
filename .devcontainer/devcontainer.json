@@ -9,23 +9,26 @@
       // Update 'VARIANT' to pick a Python version: 3, 3.10, 3.9, 3.8, 3.7, 3.6
       // Append -bullseye or -buster to pin to an OS version.
       // Use -bullseye variants on local on arm64/Apple Silicon.
-      "VARIANT": "3.9-bullseye",
+      "VARIANT": "3.9",
       // Options
       "NODE_VERSION": "lts/*"
     }
   },
-  "postCreateCommand": "pip3 install -r requirements.txt;",
+  "postCreateCommand": "pip3 install -r requirements.txt; pip3 install -r requirements-test.txt;  pip3 install tox pre-commit",
   // Set *default* container specific settings.json values on container create.
   "settings": {
-    "python.defaultInterpreterPath": "/usr/local/bin/python",
+    "files.eol": "\n",
+    "editor.tabSize": 4,
+    "python.pythonPath": "/usr/bin/python3",
+    "python.analysis.autoSearchPaths": false,
     "python.linting.pylintEnabled": true,
     "python.linting.enabled": true,
     "python.formatting.provider": "black",
-    "python.testing.pytestArgs": ["--no-cov"],
     "editor.formatOnPaste": false,
     "editor.formatOnSave": true,
     "editor.formatOnType": true,
     "files.trimTrailingWhitespace": true,
+    "python.defaultInterpreterPath": "/usr/local/bin/python",
     "python.formatting.autopep8Path": "/usr/local/py-utils/bin/autopep8",
     "python.formatting.blackPath": "/usr/local/py-utils/bin/black",
     "python.formatting.yapfPath": "/usr/local/py-utils/bin/yapf",
@@ -45,11 +48,12 @@
   },
   // Add the IDs of extensions you want installed when the container is created.
   "extensions": [
+    "ms-python.python",
+    "github.vscode-pull-request-github",
+    "ryanluker.vscode-coverage-gutters",
     "ms-python.vscode-pylance",
-    "visualstudioexptteam.vscodeintellicode",
-    "redhat.vscode-yaml",
-    "esbenp.prettier-vscode",
-    "xirider.livecode"
+    "the-compiler.python-tox",
+    "littlefoxteam.vscode-python-test-adapter"
   ],
   "containerEnv": {
     "PYTHONPATH ": "/workspaces/anycubic-python/src",
@@ -57,13 +61,10 @@
   },
   "remoteEnv": {
     "PYTHONPATH": "${containerEnv:PYTHONPATH }:/workspaces/anycubic-python/src",
-    "MY_REMOTE_VARIABLE": "some-other-value-here",
-    "MY_REMOTE_VARIABLE2": "${localEnv:SOME_LOCAL_VAR}"
   },
   // Use 'forwardPorts' to make a list of ports inside the container available locally.
   "forwardPorts": [6000],
   // Use 'postCreateCommand' to run commands after the container is created.
-  // "postCreateCommand": "pip3 install --user -r requirements.txt",
   // Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
   "remoteUser": "vscode",
   "features": {

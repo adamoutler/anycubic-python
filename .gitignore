@@ -3,3 +3,6 @@ src/uart_wifi/__pycache__/
 src/uart_wifi.egg-info/
 dist/
 build/
+.history/
+.tox
+lib/python*

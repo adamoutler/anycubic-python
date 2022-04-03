@@ -1,0 +1,16 @@
+pytest
+mypy
+lint
+typing
+codecov
+coverage
+mock-open
+freezegun
+pipdeptree
+pytest-coverage
+pytest-aiohttp
+pytest-freezegun
+pytest-socket
+pre-commit
+tomli
+pytest-asyncio

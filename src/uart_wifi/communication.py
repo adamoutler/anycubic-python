@@ -91,12 +91,18 @@ def _do_request(
         else:
             text_received = ""
             read_list = [sock]
-            end_time = datetime.now().microsecond + 10000
-            while datetime.now().microsecond < end_time:
-                readable, [], [] = select.select(read_list, [], [])
-                for read_port in readable:
-                    if read_port is sock:
-                        text_received += str(read_port.recv(1).decode())
+            port_read_delay = datetime.now().microsecond
+            end_time = datetime.now().microsecond + 5000
+            while True:
+                current_time = datetime.now().microsecond
+                if end_time > current_time or port_read_delay > current_time:
+                    readable, [], [] = select.select(read_list, [], [])
+                    for read_port in readable:
+                        if read_port is sock:
+                            port_read_delay = datetime.now().microsecond + 100
+                            text_received += str(read_port.recv(1).decode())
+                if text_received.endswith(",end"):
+                    break
 
     except (OSError, ConnectionRefusedError, ConnectionResetError) as exception:
         raise ConnectionException(
