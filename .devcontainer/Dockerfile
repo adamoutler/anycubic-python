@@ -5,11 +5,7 @@ ARG VARIANT="3.10-bullseye"
 FROM mcr.microsoft.com/vscode/devcontainers/python:0-${VARIANT}
 # [Choice] Node.js version: none, lts/*, 16, 14, 12, 10
 ARG NODE_VERSION="none"
-COPY requirements.txt /workspaces/session/
-COPY requirements-test.txt /workspaces/session/
-EXPOSE 6000
-RUN pip --disable-pip-version-check --no-cache-dir install -r /workspaces/session/requirements.txt && \
-    pip --disable-pip-version-check --no-cache-dir install -r /workspaces/session/requirements-test.txt
+
 
 
 
@@ -22,7 +18,7 @@ RUN pip --disable-pip-version-check --no-cache-dir install -r /workspaces/sessio
 # [Optional] Uncomment this section to install additional OS packages.
 # RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
 #     && apt-get -y install --no-install-recommends <your-package-list-here>
-RUN sudo apt-get update && export DEBIAN_FRONTEND=noninteractive && sudo apt-get -y install --no-install-recommends telnet
+RUN sudo apt-get update && export DEBIAN_FRONTEND=noninteractive && sudo apt-get -y install --no-install-recommends telnet python3 python3-pip
 
 # [Optional] Uncomment this line to install global node packages.
 # RUN su vscode -c "source /usr/local/share/nvm/nvm.sh && npm install -g <your-package-here>" 2>&1

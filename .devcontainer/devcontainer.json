@@ -14,12 +14,12 @@
       "NODE_VERSION": "lts/*"
     }
   },
-  "postCreateCommand": "pip3 install -r requirements.txt; pip3 install -r requirements-test.txt;  pip3 install tox pre-commit",
+  "postCreateCommand": "pip3 install -r requirements.txt; pip3 install -r requirements-test.txt;",
   // Set *default* container specific settings.json values on container create.
   "settings": {
     "files.eol": "\n",
     "editor.tabSize": 4,
-    "python.pythonPath": "/usr/bin/python3",
+    // "python.pythonPath": "/usr/bin/python3",
     "python.analysis.autoSearchPaths": false,
     "python.linting.pylintEnabled": true,
     "python.linting.enabled": true,
@@ -52,12 +52,10 @@
     "github.vscode-pull-request-github",
     "ryanluker.vscode-coverage-gutters",
     "ms-python.vscode-pylance",
-    "the-compiler.python-tox",
-    "littlefoxteam.vscode-python-test-adapter"
+    "pamaron.pytest-runner"
   ],
   "containerEnv": {
     "PYTHONPATH ": "/workspaces/anycubic-python/src",
-    "MY_CONTAINER_VAR2": "${localEnv:SOME_LOCAL_VAR}"
   },
   "remoteEnv": {
     "PYTHONPATH": "${containerEnv:PYTHONPATH }:/workspaces/anycubic-python/src",

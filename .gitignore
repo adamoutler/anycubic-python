@@ -2,7 +2,9 @@ src/__pycache__/
 src/uart_wifi/__pycache__/
 src/uart_wifi.egg-info/
 tests/__pycache__/
+.pytest_cache
 dist/
+bin/
 build/
 .history/
 .tox
