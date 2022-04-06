@@ -1,66 +1,62 @@
 """A file where we test things."""
 import socket
 import threading
-from unittest import TestCase, main as unittest_main
+import time
 import unittest
-import pytest
+
 from pytest import fail
 
 from uart_wifi.communication import UartWifi
 from uart_wifi.errors import ConnectionException
 from uart_wifi.simulate_printer import AnycubicSimulator
+from uart_wifi.response import MonoXResponseType, MonoXStatus
 
 
-# class CommunicationTests(TestCase):
-#     """Tests"""
+class TestComms(unittest.TestCase):
+    """Tests"""
 
-#     port = 62134
-#     # if __name__ == "__main__":
-#     #     suite = unittest.TestSuite()
-#     #     suite.addTest(TestCase("test_nothing_at_all"))
-#     #     suite.addTest(TestCase("test_connection"))
-#     #     suite.addTest(TestCase("test_init_fail"))
+    @classmethod
+    def setup_class(cls):
+        """Called when setting up the class to start the fake printer"""
+        sock = socket.socket()
+        sock.bind(("", 0))
+        TestComms.port = sock.getsockname()[1]
+        sock.close()
+        fake_printer = AnycubicSimulator("127.0.0.1", TestComms.port)
+        thread = threading.Thread(target=fake_printer.start_server)
+        thread.daemon = True
+        thread.start()
+        print("Sleeping while fake printer starts")
+        time.sleep(2)
+        print("Fake printer assumed started")
 
-#     #     unittest.TextTestRunner().run(suite)
+    def test_connection(self):
+        """test basic connection"""
+        uart = UartWifi("127.0.0.1", TestComms.port)
+        uart.send_request("gostop,")
+        response: list[MonoXStatus] = uart.send_request("getstatus,\n")
+        assert response[0].status == "stop\r\n"
+        print(response[0])
 
-#     def __init__(self, testname, methodName):
-#         """init"""
-#         unittest.TestCase.__init__(self, methodName=methodName)
+    def test_init_fail(self):
+        """failure of init"""
+        try:
+            uart = UartWifi("foo", TestComms.port)
+            response = uart.send_request("foo bar baz")
+            print(response)
+            fail("failure not seen for this request")
+        except (ConnectionException, IndexError):
+            pass
 
-#         self.true: bool = True
-
-#     @pytest.fixture(autouse=True)
-#     def dummy_printer(self):
-#         """Start the fake printer"""
-#         sock = socket.socket()
-#         sock.bind(("", 0))
-#         self.port = sock.getsockname()[1]
-#         sock.close()
-#         fake_printer = AnycubicSimulator("127.0.0.1", self.port)
-#         thread = threading.Thread(target=fake_printer.start_server)
-#         thread.daemon = True
-#         thread.start()
-#         yield fake_printer
-
-#     def test_connection(self):
-#         """test basic connection"""
-#         uart = UartWifi("127.0.0.1", self.port)
-#         uart.send_request("getstatus,\n")
-
-#     def test_nothing_at_all(self):
-#         """Test basic communications"""
-#         self.true = False
-#         assert self.true is not True
-
-#     def test_init_fail(self):
-#         """failure of init"""
-#         try:
-#             uart = UartWifi("foo", self.port)
-#             uart.send_request("foo bar baz")
-#             fail()
-#         except ConnectionException:
-#             pass
+    @classmethod
+    def teardown_class(cls):
+        """Called when setting up the class to start the fake printer"""
+        uart = UartWifi("127.0.0.1", TestComms.port)
+        response: list[MonoXResponseType] = uart.send_request("shutdown,")
+        try:
+            print(response[0].print())
+        except IndexError:
+            pass
 
 
-# if __name__ == "__main__":
-#     unittest_main()
+TestComms.port = 62134

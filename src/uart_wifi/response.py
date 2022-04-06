@@ -1,13 +1,16 @@
 """Mono X Objects."""
 
-##pylint: disable=too-few-public-methods
+
+# pylint: disable=too-few-public-methods
 class MonoXResponseType:
-    """The baseline MonoX Response class.  Use this to create other MonoX Responses."""
+    """The baseline MonoX Response class.
+    Use this to create other MonoX Responses."""
 
     status: str = "error/offline"
 
     def print(self):
-        """Print the MonoXResponse. Should be overridden by anything which implements this class."""
+        """Print the MonoXResponse. Should be overridden
+        by anything which implements this class."""
         return "Status: " + self.status
 
 
@@ -17,7 +20,8 @@ class MonoXFileEntry(MonoXResponseType):
     def __init__(self, internal_name: str, external_name: str) -> None:
         """Create a MonoXFileEntry
         :internal_name: the name the printer calls the file. eg "1.pwmb"
-        :external_name: The name the user calls the file. eg "My (Super) Cool.pwmb"
+        :external_name: The name the user calls the file.
+        eg "My (Super) Cool.pwmb"
         """
         self.external = internal_name
         self.internal = external_name
@@ -109,7 +113,8 @@ class MonoXSysInfo(MonoXResponseType):
         print("wifi: " + self.wifi)
 
 
-class MonoXStatus(MonoXResponseType):  # pylint: disable=too-many-instance-attributes
+# pylint: disable=too-many-instance-attributes
+class MonoXStatus(MonoXResponseType):
     """Status object for MonoX.
 
     eg message.

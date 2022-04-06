@@ -15,7 +15,8 @@ class AnycubicSimulator:
 
     def __init__(self, the_ip: str, the_port: int) -> None:
         """Construct the Anycubic Simulator
-        :the_ip: The IP address to use internally for opening the port. eg. 127.0.0.1, or 0.0.0.0
+        :the_ip: The IP address to use internally for opening the port.
+            eg. 127.0.0.1, or 0.0.0.0
         :the_port: The port to monitor for responses.
         """
         self.host = the_ip

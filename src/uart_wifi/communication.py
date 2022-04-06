@@ -1,5 +1,7 @@
-"""Communications with MonoX devices. -Adam Outler - email: adamoutler(a)hackedyour.info
-The development environment is Visual Studio Code. See launch.json for auto-config.
+"""Communications with MonoX devices. -Adam Outler -
+email: adamoutler(a)hackedyour.info
+The development environment is Visual Studio Code.
+See launch.json for auto-config.
 """
 
 
@@ -51,13 +53,16 @@ class UartWifi:  # pylint: disable=too-few-public-methods
         self.raw = False
         self.telnet_socket = socket(AF_INET, SOCK_STREAM)
 
-    def send_request(self, message_to_be_sent: str) -> MonoXResponseType:
+    def send_request(self, message_to_be_sent: str) -> list[MonoXStatus]:
         """sends the Mono X request.
-        :message_to_be_sent: The properly-formatted uart-wifi message as it is to be sent.
+        :message_to_be_sent: The properly-formatted uart-wifi message as it is
+        to be sent.
         :returns: an object from Response class.
         """
         request = bytes(message_to_be_sent, "utf-8")
-        received: str = _do_request(self.telnet_socket, self.server_address, request)
+        received: str = _do_request(
+            self.telnet_socket, self.server_address, request
+        )
         if self.raw:
             return received
         processed = _do_handle(received)
@@ -93,24 +98,35 @@ def _do_request(
             read_list = [sock]
             port_read_delay = datetime.now().microsecond
             end_time = datetime.now().microsecond + 5000
-            while True:
-                current_time = datetime.now().microsecond
-                if end_time > current_time or port_read_delay > current_time:
-                    readable, [], [] = select.select(read_list, [], [])
-                    for read_port in readable:
-                        if read_port is sock:
-                            port_read_delay = datetime.now().microsecond + 100
-                            text_received += str(read_port.recv(1).decode())
-                if text_received.endswith(",end"):
-                    break
+            handle_request(
+                sock, text_received, end_time, read_list, port_read_delay
+            )
 
-    except (OSError, ConnectionRefusedError, ConnectionResetError) as exception:
+    except (
+        OSError,
+        ConnectionRefusedError,
+        ConnectionResetError,
+    ) as exception:
         raise ConnectionException(
             "Could not connect to AnyCubic printer at " + socket_address[0]
         ) from exception
     finally:
         sock.close()
     return text_received
+
+
+def handle_request(sock, text_received, end_time, read_list, port_read_delay):
+    """performs the request handling"""
+    while True:
+        current_time = datetime.now().microsecond
+        if end_time > current_time or port_read_delay > current_time:
+            readable, [], [] = select.select(read_list, [], [])
+            for read_port in readable:
+                if read_port is sock:
+                    port_read_delay = datetime.now().microsecond + 100
+                    text_received += str(read_port.recv(1).decode())
+        if text_received.endswith(",end"):
+            break
 
 
 def _setup_socket(socket_address):
@@ -126,7 +142,8 @@ def _setup_socket(socket_address):
 
 def __do_preview2(received_message: bytearray()):
     """Handles preview by writing to file.
-    :received_message: The message, as received from UART wifi protocol, to be converted to an image.
+    :received_message: The message, as received from UART wifi
+    protocol, to be converted to an image.
     """
 
     filename = received_message.decode("utf_8").split(",", 3)[1]
@@ -198,7 +215,13 @@ def _do_handle(message: str) -> Iterable[MonoXResponseType]:
         elif message_type == "doPreview2":
             recognized_response.append(__do_preview2(fields))
         # goprint,49.pwmb,end
-        elif message_type in ["goprint", "gostop", "gopause", "getmode", "getwifi"]:
+        elif message_type in [
+            "goprint",
+            "gostop",
+            "gopause",
+            "getmode",
+            "getwifi",
+        ]:
             recognized_response.append(InvalidResponse(fields[1]))
         else:
             print("unrecognized command: " + message_type, file=sys.stderr)

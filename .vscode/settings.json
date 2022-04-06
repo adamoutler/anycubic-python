@@ -26,7 +26,7 @@
   "python.formatting.provider": "black",
   "python.formatting.blackArgs": [
         "--line-length",
-        "100"
+        "79"
     ],
   "python.envFile": "${workspaceFolder}/dev.env",
   "python.testing.pytestArgs": [],
