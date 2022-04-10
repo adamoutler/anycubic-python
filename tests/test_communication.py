@@ -23,7 +23,7 @@ class TestComms(unittest.TestCase):
         thread = threading.Thread(target=fake_printer.start_server)
         thread.daemon = False
         thread.start()
-        while(TestComms.port == 0):
+        while TestComms.port == 0:
             print("Sleeping while fake printer starts")
             time.sleep(0.2)
         time.sleep(1)  # import time
@@ -50,7 +50,16 @@ class TestComms(unittest.TestCase):
         response_printing = uart_wifi.send_request("getstatus\n")
         assert response_printing[0].status == "print"
         response_stop = uart_wifi.send_request("gostop,end\n")
-        assert(response_stop[0].status == "OK")
+        assert response_stop[0].status == "OK"
+
+    def test_gostop_error(self):
+        """Test Print command"""
+        uart_wifi: UartWifi = get_api()
+        response: Iterable[MonoXStatus] = uart_wifi.send_request("gostop,end")
+        assert len(response) > 0, "No response from Fake Printer"
+        assert (
+            response[0].status == "ERROR1"
+        ), "Invalid response from Fake Printer"
 
     def test_init_fail(self):
         """failure of init"""
