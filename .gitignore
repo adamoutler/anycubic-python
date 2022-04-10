@@ -1,7 +1,5 @@
-src/__pycache__/
-src/uart_wifi/__pycache__/
+**/__pycache__/
 src/uart_wifi.egg-info/
-tests/__pycache__/
 .pytest_cache
 dist/
 bin/
