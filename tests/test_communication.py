@@ -1,5 +1,4 @@
 """A file where we test things."""
-import socket
 import threading
 import time
 from typing import Iterable

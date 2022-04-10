@@ -24,18 +24,22 @@ args:
    Commands may be used one-at-a-time. Only one command may be sent and it is
         expected to be in the format below.
     Command: getstatus - Returns a list of printer statuses.
-    Command: getfile - returns a list of files in format <internal name>: <file name>.
+    Command: getfile - returns a list of files in format <internal name>:
+        <file name>.
         When referring to the file via command, use the <internal name>.
-    Command: sysinfo - returns Model, Firmware version, Serial Number, and wifi network.
+    Command: sysinfo - returns Model, Firmware version, Serial Number,
+        and wifi network.
     Command: getwifi - displays the current wifi network name.
     Command: gopause - pauses the current print.
     Command: goresume - ends the current print.
     Command: gostop,end - stops the current print.
     Command: delfile,<internal name>,end - deletes a file.
-    command: gethistory,end - gets the history and print settings of previous prints.
+    command: gethistory,end - gets the history and print settings of previous
+        prints.
     Command: delhistory,end - deletes printing history.
     Command: goprint,<internal name>,end - Starts a print of the requested file
-    Command: getPreview1,<internal name>,end - returns a list of dimensions used for the print.
+    Command: getPreview1,<internal name>,end - returns a list of dimensions
+        used for the print.
 
    Not Supported Commands may return unusable results.
     Command (Not Supported): getPreview2,<internal name>,end
@@ -90,7 +94,7 @@ if "ip_address" not in locals():
 
 if ip_address == "127.0.0.1":
     time.sleep(1)
-Responses = None
+responses = None  # pylint: disable=invalid-name
 # Try 3 times to get the data.
 attempts: int = 0
 while attempts < 3:
@@ -98,17 +102,17 @@ while attempts < 3:
         uart = UartWifi(ip_address, PORT)
         if USE_RAW:
             uart.raw = True
-        Responses: Iterable[MonoXResponseType] = uart.send_request(command)
+        responses: Iterable[MonoXResponseType] = uart.send_request(command)
         break
     except ConnectionException:
         attempts += 1
 
 
-if Responses is not None and isinstance(Responses, Iterable):
-    for response in Responses:
+if responses is not None and isinstance(responses, Iterable):
+    for response in responses:
         if isinstance(response, MonoXResponseType):
             response.print()
         else:
             print(response)
 else:
-    print(Responses)
+    print(responses)

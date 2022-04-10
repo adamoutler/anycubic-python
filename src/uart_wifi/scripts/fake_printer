@@ -5,9 +5,11 @@ import getopt
 import sys
 from uart_wifi.simulate_printer import AnycubicSimulator
 
+
 def start_server(the_ip: str, port: int) -> None:
     """Starts the server
-    :the_ip: The IP address to use internally for opening the port. eg. 127.0.0.1, or 0.0.0.0
+    :the_ip: The IP address to use internally for opening the port.
+        eg. 127.0.0.1, or 0.0.0.0
     :the_port: The port to monitor for responses.
     """
     AnycubicSimulator(the_ip, int(port)).start_server()
