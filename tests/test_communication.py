@@ -2,6 +2,7 @@
 import socket
 import threading
 import time
+from typing import Iterable
 import unittest
 
 from pytest import fail
@@ -9,7 +10,7 @@ from pytest import fail
 from uart_wifi.communication import UartWifi
 from uart_wifi.errors import ConnectionException
 from uart_wifi.simulate_printer import AnycubicSimulator
-from uart_wifi.response import MonoXResponseType, MonoXStatus
+from uart_wifi.response import MonoXStatus, MonoXResponseType
 
 
 class TestComms(unittest.TestCase):
@@ -18,24 +19,30 @@ class TestComms(unittest.TestCase):
     @classmethod
     def setup_class(cls):
         """Called when setting up the class to start the fake printer"""
-        sock = socket.socket()
-        sock.bind(("", 0))
-        TestComms.port = sock.getsockname()[1]
-        sock.close()
-        fake_printer = AnycubicSimulator("127.0.0.1", TestComms.port)
+        fake_printer = AnycubicSimulator("127.0.0.1", 0)
+
         thread = threading.Thread(target=fake_printer.start_server)
-        thread.daemon = True
+        thread.daemon = False
         thread.start()
         print("Sleeping while fake printer starts")
-        time.sleep(2)
+        time.sleep(3)
+        TestComms.port = fake_printer.port
         print("Fake printer assumed started")
 
     def test_connection(self):
         """test basic connection"""
-        uart = UartWifi("127.0.0.1", TestComms.port)
-        uart.send_request("gostop,")
-        response: list[MonoXStatus] = uart.send_request("getstatus,\n")
-        assert response[0].status == "stop\r\n"
+        port = TestComms.port
+        print(f"connecting to 127.0.0.1:{port}")
+        response: Iterable[MonoXStatus] = UartWifi(
+            "127.0.0.1",
+            TestComms.port
+        ).send_request(
+            "getstatus,"
+        )
+        assert len(response) > 0, "No response from Fake Printer"
+        assert (
+            response[0].status == "stop\r\n"
+        ), "Invalid response from Fake Printer"
         print(response[0])
 
     def test_init_fail(self):
@@ -51,6 +58,7 @@ class TestComms(unittest.TestCase):
     @classmethod
     def teardown_class(cls):
         """Called when setting up the class to start the fake printer"""
+
         uart = UartWifi("127.0.0.1", TestComms.port)
         response: list[MonoXResponseType] = uart.send_request("shutdown,")
         try:

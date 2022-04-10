@@ -63,7 +63,7 @@ try:
         sys.argv, "drhi:c:p:", ["raw", "ipaddress=", "command=", "port="]
     )
 # pylint: disable=broad-except
-except Exception as e:
+except Exception:
     print(HELP)
     sys.exit(0)
 
@@ -104,7 +104,7 @@ while attempts < 3:
         attempts += 1
 
 
-if Responses != None and isinstance(Responses, list):
+if Responses is not None and isinstance(Responses, Iterable):
     for response in Responses:
         if isinstance(response, MonoXResponseType):
             response.print()

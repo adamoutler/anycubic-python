@@ -71,7 +71,7 @@ class UartWifi:  # pylint: disable=too-few-public-methods
 
 def _do_request(
     sock: socket, socket_address: tuple, to_be_sent: bytes
-) -> MonoXResponseType:
+) -> str:
     """Perform the request
 
     :param sock: the socket to use for the request
@@ -87,18 +87,18 @@ def _do_request(
         if sent_string.startswith("b'getPreview2"):
             text_received = bytearray()
             print(text_received)
-            end_time = datetime.now().microsecond + 10000
+            end_time = datetime.now().microsecond + 1000000
             while (
                 not str(text_received).endswith(END)
                 and datetime.now().microsecond < end_time
             ):
                 text_received.extend(sock.recv(1))
         else:
-            text_received = ""
+
             read_list = [sock]
             port_read_delay = datetime.now().microsecond
-            end_time = datetime.now().microsecond + 5000
-            handle_request(
+            end_time = datetime.now().microsecond + 500000
+            text_received = handle_request(
                 sock, text_received, end_time, read_list, port_read_delay
             )
 
@@ -115,7 +115,9 @@ def _do_request(
     return text_received
 
 
-def handle_request(sock, text_received, end_time, read_list, port_read_delay):
+def handle_request(
+    sock, text_received, end_time, read_list, port_read_delay
+) -> str:
     """performs the request handling"""
     while True:
         current_time = datetime.now().microsecond
@@ -123,10 +125,11 @@ def handle_request(sock, text_received, end_time, read_list, port_read_delay):
             readable, [], [] = select.select(read_list, [], [])
             for read_port in readable:
                 if read_port is sock:
-                    port_read_delay = datetime.now().microsecond + 100
+                    port_read_delay = datetime.now().microsecond + 10000
                     text_received += str(read_port.recv(1).decode())
         if text_received.endswith(",end"):
             break
+    return text_received
 
 
 def _setup_socket(socket_address):
@@ -265,5 +268,4 @@ def __do_files(fields: Iterable):
 def __do_status(fields: Iterable):
     """Handles status processing."""
     status = MonoXStatus(fields)
-    status.print()
     return status

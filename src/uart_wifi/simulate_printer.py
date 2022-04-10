@@ -60,6 +60,8 @@ class AnycubicSimulator:
         my_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         my_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         my_socket.bind((self.host, self.port))
+        self.port = my_socket.getsockname()[1]
+        print(f"Starting printer on {self.host}:{self.port}")
         my_socket.listen(1)
         my_socket.setblocking(False)
         read_list = [my_socket]
@@ -85,7 +87,7 @@ class AnycubicSimulator:
         :conn: The connection to use
         :addr: address tuple for ip and port
         """
-        print(f"Connected to {addr}")
+        print(f"Simulator: accepted connection to {addr}")
         decoded_data = ""
         with conn:
             while (
@@ -119,7 +121,8 @@ class AnycubicSimulator:
             if split == "":
                 continue
             if "getstatus" in split:
-                conn.sendall(self.getstatus().encode())
+                return_value = self.getstatus()
+                conn.sendall(return_value.encode())
             if "sysinfo" in split:
                 conn.sendall(self.sysinfo().encode())
             if "getfile" in split:
