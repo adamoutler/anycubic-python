@@ -9,7 +9,7 @@ from pytest import fail
 from uart_wifi.communication import UartWifi
 from uart_wifi.errors import ConnectionException
 from uart_wifi.simulate_printer import AnycubicSimulator
-from uart_wifi.response import MonoXStatus, MonoXResponseType
+from uart_wifi.response import MonoXStatus, MonoXResponseType, MonoXSysInfo
 
 
 class TestComms(unittest.TestCase):
@@ -70,6 +70,22 @@ class TestComms(unittest.TestCase):
             fail("failure not seen for this request")
         except (ConnectionException, IndexError):
             pass
+
+    def test_get_mode(self):
+        """failure of init"""
+        uart = get_api()
+        response = uart.send_request("getmode\n")
+        assert response[0].status == "0"
+
+    def test_sysinfo(self):
+        """failure of init"""
+        uart = get_api()
+        response: MonoXSysInfo = uart.send_request("sysinfo\n")
+        assert response[0].status == "updated"
+        assert response[0].firmware == "V0.2.2"
+        assert response[0].model == "Photon Mono X 6K"
+        assert response[0].serial == "234234234"
+        assert response[0].wifi == ""
 
     @classmethod
     def teardown_class(cls):
