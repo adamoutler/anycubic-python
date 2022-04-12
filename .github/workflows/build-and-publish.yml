@@ -3,7 +3,7 @@ name: Build anycubic-python 🐍 distributions
 on: push
 
 jobs:
-  pylint:
+  lint:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -14,10 +14,14 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pylint
+        pip install pylint flake8
     - name: Analysing the code with pylint
       run: |
         find . -name '*.py' -exec pylint {} \;
+    - name: Analyze trhe code with flake8
+      run: |
+        flake8 src/uart_wifi
+
   build:
     runs-on: ubuntu-18.04
     strategy:
@@ -61,7 +65,6 @@ jobs:
         architecture: x64
     - run: |
         python -m pip install --upgrade pip;
-        pip install flake8 pytest;
         pip install -r requirements.txt;
         pip install -r requirements-test.txt;
     - name: Test
@@ -71,7 +74,7 @@ jobs:
   publish:
     needs:
       - Test
-      - pylint
+      - lint
     runs-on: ubuntu-18.04
     name: Publish distribution 📦 to PyPI
     steps:
