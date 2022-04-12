@@ -69,7 +69,7 @@ jobs:
         pytest
   publish:
     needs:
-      - build
+      - Test
       - pylint
     runs-on: ubuntu-18.04
     name: Publish distribution 📦 to PyPI
