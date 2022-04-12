@@ -46,10 +46,12 @@ jobs:
         --outdir dist/
   Test:
     runs-on: ubuntu-18.04
+    needs:
+      - build
     strategy:
       matrix:
         python-version: [ 'pypy-3.7', 'pypy-3.8', 'pypy-3.9' ]
-    name: Build Python 🐍 ${{ matrix.python-version }}
+    name: Test 🐍 ${{ matrix.python-version }}
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-python@v2
@@ -57,12 +59,11 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
         architecture: x64
-    - run: >-
-        python -m
-        pip install
-        build
-        --user
-
+    - run: |
+        python -m pip install --upgrade pip;
+        pip install flake8 pytest;
+        pip install -r requirements.txt;
+        pip install -r requirements-test.txt;
     - name: Test
       run: >-
         pytest
