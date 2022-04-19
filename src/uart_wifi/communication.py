@@ -53,7 +53,7 @@ class UartWifi:  # pylint: disable=too-few-public-methods
         self.raw = False
         self.telnet_socket = socket(AF_INET, SOCK_STREAM)
 
-    def send_request(self, message_to_be_sent: str) -> list[MonoXStatus]:
+    def send_request(self, message_to_be_sent: str) -> list[MonoXResponseType]:
         """sends the Mono X request.
         :message_to_be_sent: The properly-formatted uart-wifi message as it is
         to be sent.
@@ -69,9 +69,7 @@ class UartWifi:  # pylint: disable=too-few-public-methods
         return processed
 
 
-def _do_request(
-    sock: socket, socket_address: tuple, to_be_sent: bytes
-) -> str:
+def _do_request(sock: socket, socket_address: tuple, to_be_sent: bytes) -> str:
     """Perform the request
 
     :param sock: the socket to use for the request
