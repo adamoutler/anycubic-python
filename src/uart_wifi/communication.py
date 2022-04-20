@@ -41,7 +41,7 @@ MAX_REQUEST_TIME = 10  # seconds
 Response = Iterable[MonoXResponseType]
 
 
-class UartWifi:  # pylint: disable=too-few-public-methods
+class UartWifi:
     """Mono X Class"""
 
     def __init__(self, ip_address: str, port: int) -> None:
@@ -52,6 +52,13 @@ class UartWifi:  # pylint: disable=too-few-public-methods
         self.server_address = (ip_address, port)
         self.raw = False
         self.telnet_socket = socket(AF_INET, SOCK_STREAM)
+
+    def set_raw(self, raw: bool = True) -> None:
+        """Set raw mode.
+        :raw: Set to true if we are outputting raw data instead of processed
+            classes.
+        """
+        self.raw = raw
 
     def send_request(self, message_to_be_sent: str) -> list[MonoXResponseType]:
         """sends the Mono X request.
@@ -136,6 +143,7 @@ def _setup_socket(socket_address):
     """
     _LOGGER.debug("connecting to %s", socket_address)
     sock = socket(AF_INET, SOCK_STREAM)
+    sock.settimeout(2)
     sock.connect(socket_address)
     sock.settimeout(MAX_REQUEST_TIME)
     return sock
