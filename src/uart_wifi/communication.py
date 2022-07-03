@@ -5,6 +5,7 @@ See launch.json for auto-config.
 """
 
 import asyncio
+import concurrent.futures
 import logging
 from datetime import datetime
 import os
@@ -26,7 +27,6 @@ from .response import (
     MonoXStatus,
     MonoXSysInfo,
 )
-
 
 # Port to listen on
 
@@ -67,9 +67,21 @@ class UartWifi:
         :returns: an object from Response class.
         """
         retvalue = "foo"
-        return_value = asyncio.run(
-            self._send_request(message_to_be_sent, retvalue)
-        )
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:  # 'There is no current event loop...'
+            loop = None
+        if loop and loop.is_running():
+            pool = concurrent.futures.ThreadPoolExecutor()
+            result = pool.submit(
+                asyncio.run, self._send_request(message_to_be_sent, retvalue)
+            ).result()
+
+            return result
+        else:
+            return_value = asyncio.run(
+                self._send_request(message_to_be_sent, retvalue)
+            )
 
         return return_value
 
