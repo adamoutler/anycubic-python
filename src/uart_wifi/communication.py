@@ -5,7 +5,8 @@ See launch.json for auto-config.
 """
 
 
-from asyncio.log import logger
+import asyncio
+import logging
 from datetime import datetime
 import os
 import select
@@ -35,7 +36,7 @@ COMMAND = "getstatus"
 endRequired = ["goprint", "gostop", "gopause", "delfile"]
 END = ",end"
 ENCODING = "gbk"
-_LOGGER = logger
+_LOGGER = logging.getLogger(__name__)
 Any = object()
 MAX_REQUEST_TIME = 10  # seconds
 Response = Iterable[MonoXResponseType]
@@ -60,15 +61,18 @@ class UartWifi:
         """
         self.raw = raw
 
-    def send_request(self, message_to_be_sent: str) -> list[MonoXResponseType]:
+    async def send_request(
+        self, message_to_be_sent: str
+    ) -> list[MonoXResponseType]:
         """sends the Mono X request.
         :message_to_be_sent: The properly-formatted uart-wifi message as it is
         to be sent.
         :returns: an object from Response class.
         """
         request = bytes(message_to_be_sent, "utf-8")
-        received: str = _do_request(
-            self.telnet_socket, self.server_address, request
+        received: str = await asyncio.wait_for(
+            _do_request(self.telnet_socket, self.server_address, request),
+            MAX_REQUEST_TIME,
         )
         if self.raw:
             return received
@@ -76,7 +80,9 @@ class UartWifi:
         return processed
 
 
-def _do_request(sock: socket, socket_address: tuple, to_be_sent: bytes) -> str:
+async def _do_request(
+    sock: socket, socket_address: tuple, to_be_sent: bytes
+) -> str:
     """Perform the request
 
     :param sock: the socket to use for the request
@@ -185,13 +191,13 @@ def __do_preview2(received_message: bytearray()):
         if pos_in_image > (240 * 2):
             pos_in_image = 0
             current_slice = bytearray
-            slices.append(current_slice)
+            my_slice.append(current_slice)
 
     # image = Image.new("RGB", (width, height))
     # file_format = "bmp"  # The file extension of the sourced data
-    print(len(slices))
+    print(len(my_slice))
 
-    print(slice)
+    print(my_slice)
 
     # bytes(byte_array)
     # image.write(output_file,file_format)

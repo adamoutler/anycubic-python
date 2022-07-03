@@ -158,7 +158,7 @@ class MonoXStatus(MonoXResponseType):
         if hasattr(self, "file"):
             print("file: " + self.file)
             print("total_layers: " + str(self.total_layers))
-            print("unknown: " + str(self.percent_complete))
+            print("percent_complete: " + str(self.percent_complete))
             print("current_layer: " + str(self.current_layer))
             print("seconds_remaining: " + str(self.seconds_remaining))
             print("total_volume: " + str(self.total_volume))
