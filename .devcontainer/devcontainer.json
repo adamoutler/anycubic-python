@@ -54,13 +54,15 @@
 	"ms-python.vscode-pylance",
 	"pamaron.pytest-runner",
 	"GitHub.vscode-pull-request-github",
-	"donjayamanne.python-extension-pack"
+	"donjayamanne.python-extension-pack",
+	"esbenp.prettier-vscode",
+	"eamodio.gitlens"
 ],
   "containerEnv": {
-    "PYTHONPATH ": "/workspaces/anycubic-python/src",
+    "PYTHONPATH ": "/workspaces/anycubic-python/src"
   },
   "remoteEnv": {
-    "PYTHONPATH": "${containerEnv:PYTHONPATH }:/workspaces/anycubic-python/src",
+    "PYTHONPATH": "${containerEnv:PYTHONPATH }:/workspaces/anycubic-python/src"
   },
   // Use 'forwardPorts' to make a list of ports inside the container available locally.
   "forwardPorts": [6000],

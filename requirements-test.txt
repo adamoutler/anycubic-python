@@ -4,3 +4,4 @@ asyncio
 pytest-socket
 tomli
 pytest-asyncio
+prettier
