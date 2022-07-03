@@ -1,5 +1,6 @@
 pytest
 lint
+asyncio
 pytest-socket
 tomli
 pytest-asyncio

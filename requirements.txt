@@ -1,3 +1,4 @@
 Pillow
 build
 typing
+asyncio
