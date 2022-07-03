@@ -48,12 +48,14 @@
   },
   // Add the IDs of extensions you want installed when the container is created.
   "extensions": [
-    "ms-python.python",
-    "github.vscode-pull-request-github",
-    "ryanluker.vscode-coverage-gutters",
-    "ms-python.vscode-pylance",
-    "pamaron.pytest-runner"
-  ],
+	"ms-python.python",
+	"github.vscode-pull-request-github",
+	"ryanluker.vscode-coverage-gutters",
+	"ms-python.vscode-pylance",
+	"pamaron.pytest-runner",
+	"GitHub.vscode-pull-request-github",
+	"donjayamanne.python-extension-pack"
+],
   "containerEnv": {
     "PYTHONPATH ": "/workspaces/anycubic-python/src",
   },
