@@ -70,7 +70,7 @@ jobs:
       - Test
       - lint
     runs-on: ubuntu-18.04
-    name: Publish distribution 📦 to PyPI
+    name: Build 📦 and ship 🏗️ new tags  to PyPI
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-python@v2
