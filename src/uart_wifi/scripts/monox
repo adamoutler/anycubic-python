@@ -1,7 +1,6 @@
 #! python3
 """Uart wifi"""
 
-import asyncio
 import getopt
 import sys
 import time
@@ -103,9 +102,8 @@ while attempts < 3:
         uart = UartWifi(ip_address, PORT)
         if USE_RAW:
             uart.raw = True
-        responses: Iterable[MonoXResponseType] = asyncio.run(
-            uart.send_request(command)
-        )
+        responses: Iterable[MonoXResponseType] = uart.send_request(command)
+
         break
     except ConnectionException:
         attempts += 1

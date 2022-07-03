@@ -4,7 +4,6 @@ The development environment is Visual Studio Code.
 See launch.json for auto-config.
 """
 
-
 import asyncio
 import logging
 from datetime import datetime
@@ -61,7 +60,31 @@ class UartWifi:
         """
         self.raw = raw
 
-    async def send_request(
+    def send_request(self, message_to_be_sent: str) -> list[MonoXResponseType]:
+        """sends the Mono X request.
+        :message_to_be_sent: The properly-formatted uart-wifi message as it is
+        to be sent.
+        :returns: an object from Response class.
+        """
+        retvalue = "foo"
+        return_value = asyncio.run(
+            self._send_request(message_to_be_sent, retvalue)
+        )
+
+        return return_value
+
+    async def _send_request(
+        self, message_to_be_sent: str, return_value: list[MonoXResponseType]
+    ) -> list[MonoXResponseType]:
+        """sends the Mono X request.
+        :message_to_be_sent: The properly-formatted uart-wifi message as it is
+        to be sent.
+        :returns: an object from Response class.
+        """
+        return_value = await self._async_send_request(message_to_be_sent)
+        return return_value
+
+    async def _async_send_request(
         self, message_to_be_sent: str
     ) -> list[MonoXResponseType]:
         """sends the Mono X request.
