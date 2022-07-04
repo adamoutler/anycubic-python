@@ -75,7 +75,7 @@ class AnycubicSimulator:
                             target=self.response_selector,
                             args=(conn, addr),
                         )
-                        thread.setDaemon(True)
+                        thread.daemon = True
                         thread.start()
                     except Exception:  # pylint: disable=broad-except
                         pass
