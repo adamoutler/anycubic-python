@@ -3,6 +3,8 @@ src/uart_wifi.egg-info/
 .pytest_cache
 dist/
 bin/
+bin/python*
+src/scripts/*.py
 build/
 .history/
 .tox
