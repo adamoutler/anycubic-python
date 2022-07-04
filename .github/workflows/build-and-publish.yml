@@ -3,6 +3,12 @@ name: Build anycubic-python 🐍 distributions
 on: push
 
 jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: google-github-actions/release-please-action@v3
+        with:
+          release-type: python
   lint:
     runs-on: ubuntu-latest
     steps:
