@@ -5,6 +5,7 @@ ARG VARIANT="3.10-buster"
 FROM mcr.microsoft.com/vscode/devcontainers/python:0-${VARIANT}
 # [Choice] Node.js version: none, lts/*, 16, 14, 12, 10
 ARG NODE_VERSION="none"
+RUN apt update && apt install git
 
 
 
