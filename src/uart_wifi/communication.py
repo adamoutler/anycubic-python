@@ -4,7 +4,6 @@ The development environment is Visual Studio Code.
 See launch.json for auto-config.
 """
 
-import asyncio
 import logging
 import os
 import select
@@ -75,30 +74,20 @@ class UartWifi:
         to be sent.
         :returns: an object from Response class.
         """
-        try:
-            loop = asyncio.get_running_loop()
-        except RuntimeError:  # 'There is no current event loop...'
-            loop = None
-        if loop and loop.is_running():
-            pool = asyncio.get_event_loop()
-            result = asyncio.run_coroutine_threadsafe(
-                self._send_request(message_to_be_sent), pool
-            ).result()
-            return result
-        else:
-            return_value = asyncio.run(self._send_request(message_to_be_sent))
+
+        return_value = self._send_request(message_to_be_sent)
         return return_value
 
-    async def _send_request(self, message: str) -> Iterable[MonoXResponseType]:
+    def _send_request(self, message: str) -> Iterable[MonoXResponseType]:
         """sends the Mono X request.
         :message_to_be_sent: The properly-formatted uart-wifi message as it is
         to be sent.
         :returns: an object from Response class.
         """
-        return_value = await self._async_send_request(message)
+        return_value = self._async_send_request(message)
         return return_value
 
-    async def _async_send_request(
+    def _async_send_request(
         self, message_to_be_sent: str
     ) -> Iterable[MonoXResponseType]:
         """sends the Mono X request.
@@ -107,13 +96,10 @@ class UartWifi:
         :returns: an object from Response class.
         """
         request = bytes(message_to_be_sent, "utf-8")
-        received: str = await asyncio.wait_for(
-            _do_request(
-                self.telnet_socket,
-                self.server_address,
-                request,
-                self.max_request_time,
-            ),
+        received: str = _do_request(
+            self.telnet_socket,
+            self.server_address,
+            request,
             self.max_request_time,
         )
         if self.raw:
@@ -122,7 +108,7 @@ class UartWifi:
         return processed
 
 
-async def _do_request(
+def _do_request(
     sock: socket,
     socket_address: tuple,
     to_be_sent: bytes,

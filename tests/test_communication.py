@@ -39,6 +39,14 @@ class TestComms(unittest.TestCase):
             response[0].status == "stop\r\n"
         ), "Invalid response from Fake Printer"
 
+    def test_timeout(self):
+        """test basic connection"""
+        uart_wifi: UartWifi = get_api()
+        response: Iterable[MonoXStatus] = uart_wifi.send_request("timeout,")
+        assert len(response) == 0, (
+            "Expected no response from Fake Printer but got " + response[0]
+        )
+
     def test_print(self):
         """Test Print command"""
         uart_wifi: UartWifi = get_api()
