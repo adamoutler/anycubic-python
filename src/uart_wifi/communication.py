@@ -5,7 +5,6 @@ See launch.json for auto-config.
 """
 
 import asyncio
-import concurrent.futures
 import logging
 from datetime import datetime
 import os
@@ -60,44 +59,40 @@ class UartWifi:
         """
         self.raw = raw
 
-    def send_request(self, message_to_be_sent: str) -> list[MonoXResponseType]:
+    def send_request(
+        self, message_to_be_sent: str
+    ) -> Iterable[MonoXResponseType]:
         """sends the Mono X request.
         :message_to_be_sent: The properly-formatted uart-wifi message as it is
         to be sent.
         :returns: an object from Response class.
         """
-        retvalue = "foo"
         try:
             loop = asyncio.get_running_loop()
         except RuntimeError:  # 'There is no current event loop...'
             loop = None
         if loop and loop.is_running():
-            pool = concurrent.futures.ThreadPoolExecutor()
+            pool = asyncio.get_event_loop()
             result = asyncio.run_coroutine_threadsafe(
-                self._send_request(message_to_be_sent, retvalue), pool
+                self._send_request(message_to_be_sent), pool
             ).result()
             return result
         else:
-            return_value = asyncio.run(
-                self._send_request(message_to_be_sent, retvalue)
-            )
-
+            return_value = asyncio.run(self._send_request(message_to_be_sent))
         return return_value
 
-    async def _send_request(
-        self, message_to_be_sent: str, return_value: list[MonoXResponseType]
-    ) -> list[MonoXResponseType]:
+    async def _send_request(self, message: str) -> Iterable[MonoXResponseType]:
         """sends the Mono X request.
         :message_to_be_sent: The properly-formatted uart-wifi message as it is
         to be sent.
         :returns: an object from Response class.
         """
-        return_value = await self._async_send_request(message_to_be_sent)
+        return_value = await self._async_send_request(message)
         return return_value
 
     async def _async_send_request(
         self, message_to_be_sent: str
-    ) -> list[MonoXResponseType]:
+    ) -> Iterable[MonoXResponseType]:
         """sends the Mono X request.
         :message_to_be_sent: The properly-formatted uart-wifi message as it is
         to be sent.
