@@ -3,16 +3,6 @@ name: Build anycubic-python 🐍 distributions
 on: push
 
 jobs:
-  release:
-    steps:
-      - run:
-          name: install autotag binary
-          command: |
-            curl -sL https://git.io/autotag-install | sudo sh -s -- -b /usr/bin
-      - run:
-          name: increment version
-          command: |
-           autotag
   lint:
     runs-on: ubuntu-latest
     steps:
