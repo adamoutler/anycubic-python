@@ -1,7 +1,6 @@
 name: Build anycubic-python 🐍 distributions
 on: push
 jobs:
-  release-please:
   lint:
     runs-on: ubuntu-latest
     steps:
