@@ -144,6 +144,9 @@ class AnycubicSimulator:
                 print("sent:" + value)
                 conn.sendall(value.encode())
                 decoded_data = ""
+            if "timeout" in split:
+                time.sleep(99999)
+
             if "multi" in split:
                 value = self.getstatus() + self.sysinfo() + "getmode,0,end"
                 print("sent:" + value)

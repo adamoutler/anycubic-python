@@ -4,8 +4,6 @@
   // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
   "version": "0.2.0",
   "configurations": [
-
-
     {
       "args": ["-i", "0.0.0.0", "-p6000"],
       "name": "Server",
@@ -34,6 +32,22 @@
     {
       "args": ["-i", "127.0.0.1", "-p", "6000", "--command=getstatus,", "-d"],
       "name": "status",
+      "type": "python",
+      "request": "launch",
+      "program": "src/uart_wifi/scripts/monox.py",
+      "console": "integratedTerminal"
+    },
+    {
+      "args": ["-i", "127.0.0.1", "-p", "6000", "--command=sysinfo,", "-d"],
+      "name": "sysinfo",
+      "type": "python",
+      "request": "launch",
+      "program": "src/uart_wifi/scripts/monox.py",
+      "console": "integratedTerminal"
+    },
+    {
+      "args": ["-i", "127.0.0.1", "-p", "6000", "--command=timeout,", "-d"],
+      "name": "timeout",
       "type": "python",
       "request": "launch",
       "program": "src/uart_wifi/scripts/monox.py",

@@ -6,7 +6,6 @@ See launch.json for auto-config.
 
 import asyncio
 import logging
-from datetime import datetime
 import os
 import select
 import sys
@@ -14,6 +13,7 @@ from queue import Empty
 
 from socket import AF_INET, SOCK_STREAM, socket
 import tempfile
+import time
 from typing import Iterable
 
 from uart_wifi.errors import ConnectionException
@@ -43,6 +43,8 @@ Response = Iterable[MonoXResponseType]
 class UartWifi:
     """Mono X Class"""
 
+    max_request_time = MAX_REQUEST_TIME
+
     def __init__(self, ip_address: str, port: int) -> None:
         """Create a communications UartWifi class.
         :ip_address: The IP to initiate communications with.
@@ -51,6 +53,12 @@ class UartWifi:
         self.server_address = (ip_address, port)
         self.raw = False
         self.telnet_socket = socket(AF_INET, SOCK_STREAM)
+
+    def set_maximum_request_time(self, max_request_time: int) -> None:
+        """Set the maximum time to wait for a response.
+        :max_request_time: The maximum time to wait for a response.
+        """
+        self.max_request_time = max_request_time
 
     def set_raw(self, raw: bool = True) -> None:
         """Set raw mode.
@@ -100,8 +108,13 @@ class UartWifi:
         """
         request = bytes(message_to_be_sent, "utf-8")
         received: str = await asyncio.wait_for(
-            _do_request(self.telnet_socket, self.server_address, request),
-            MAX_REQUEST_TIME,
+            _do_request(
+                self.telnet_socket,
+                self.server_address,
+                request,
+                self.max_request_time,
+            ),
+            self.max_request_time,
         )
         if self.raw:
             return received
@@ -110,7 +123,10 @@ class UartWifi:
 
 
 async def _do_request(
-    sock: socket, socket_address: tuple, to_be_sent: bytes
+    sock: socket,
+    socket_address: tuple,
+    to_be_sent: bytes,
+    max_request_time: int,
 ) -> str:
     """Perform the request
 
@@ -127,19 +143,24 @@ async def _do_request(
         if sent_string.startswith("b'getPreview2"):
             text_received = bytearray()
             print(text_received)
-            end_time = datetime.now().microsecond + 1000000
+            end_time = current_milli_time() + (max_request_time * 1000)
             while (
                 not str(text_received).endswith(END)
-                and datetime.now().microsecond < end_time
+                and current_milli_time() < end_time
             ):
                 text_received.extend(sock.recv(1))
         else:
 
             read_list = [sock]
-            port_read_delay = datetime.now().microsecond
-            end_time = datetime.now().microsecond + 500000
+            port_read_delay = current_milli_time()
+            end_time = current_milli_time() + (max_request_time * 1000)
             text_received = handle_request(
-                sock, text_received, end_time, read_list, port_read_delay
+                sock,
+                text_received,
+                end_time,
+                read_list,
+                port_read_delay,
+                max_request_time,
             )
 
     except (
@@ -156,18 +177,20 @@ async def _do_request(
 
 
 def handle_request(
-    sock, text_received, end_time, read_list, port_read_delay
+    sock, text_received, end_time, read_list, port_read_delay, max_request_time
 ) -> str:
     """performs the request handling"""
     while True:
-        current_time = datetime.now().microsecond
+        current_time = current_milli_time()
         if end_time > current_time or port_read_delay > current_time:
-            readable, [], [] = select.select(read_list, [], [])
+            readable, [], [] = select.select(
+                read_list, [], [], max_request_time
+            )
             for read_port in readable:
                 if read_port is sock:
-                    port_read_delay = datetime.now().microsecond + 10000
+                    port_read_delay = current_milli_time() + 8000
                     text_received += str(read_port.recv(1).decode())
-        if text_received.endswith(",end"):
+        if end_time < current_milli_time() or text_received.endswith(",end"):
             break
     return text_received
 
@@ -310,3 +333,7 @@ def __do_status(fields: Iterable):
     """Handles status processing."""
     status = MonoXStatus(fields)
     return status
+
+
+def current_milli_time():
+    return round(time.time() * 1000)
