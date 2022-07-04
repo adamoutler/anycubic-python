@@ -9,7 +9,7 @@
       // Update 'VARIANT' to pick a Python version: 3, 3.10, 3.9, 3.8, 3.7, 3.6
       // Append -bullseye or -buster to pin to an OS version.
       // Use -bullseye variants on local on arm64/Apple Silicon.
-      "VARIANT": "3.9",
+      "VARIANT": "3.10-buster",
       // Options
       "NODE_VERSION": "lts/*"
     }
@@ -48,16 +48,23 @@
   },
   // Add the IDs of extensions you want installed when the container is created.
   "extensions": [
-	"ms-python.python",
-	"github.vscode-pull-request-github",
-	"ryanluker.vscode-coverage-gutters",
-	"ms-python.vscode-pylance",
-	"pamaron.pytest-runner",
-	"GitHub.vscode-pull-request-github",
-	"donjayamanne.python-extension-pack",
-	"esbenp.prettier-vscode",
-	"eamodio.gitlens"
-],
+    "ms-python.vscode-pylance",
+    "visualstudioexptteam.vscodeintellicode",
+    "esbenp.prettier-vscode",
+    "xirider.livecode",
+    "the-compiler.python-tox",
+    "ms-python.python",
+    "GitHub.copilot",
+    "github.vscode-pull-request-github",
+    "ryanluker.vscode-coverage-gutters",
+    "ms-python.vscode-pylance",
+    "pamaron.pytest-runner",
+    "GitHub.vscode-pull-request-github",
+    "donjayamanne.python-extension-pack",
+    "esbenp.prettier-vscode",
+    "eamodio.gitlens",
+    "GitHub.copilot"
+  ],
   "containerEnv": {
     "PYTHONPATH ": "/workspaces/anycubic-python/src"
   },

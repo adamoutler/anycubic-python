@@ -73,10 +73,9 @@ class UartWifi:
             loop = None
         if loop and loop.is_running():
             pool = concurrent.futures.ThreadPoolExecutor()
-            result = pool.submit(
-                asyncio.run, self._send_request(message_to_be_sent, retvalue)
+            result = asyncio.run_coroutine_threadsafe(
+                self._send_request(message_to_be_sent, retvalue), pool
             ).result()
-
             return result
         else:
             return_value = asyncio.run(
